@@ -45,6 +45,7 @@ private:
     static unsigned int decode_char(char c)
     {
         if (c >= 'A' && c <= 'Z') return (unsigned int)c - 'A' + 10;
+        if (c >= 'a' && c <= 'z') return (unsigned int)c - 'a' + 10;
         else if (c >= '0' && c <= '9') return (unsigned int)c - '0';
         return (unsigned char)0xff;
     }
