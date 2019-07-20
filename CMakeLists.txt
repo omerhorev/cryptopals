@@ -4,7 +4,7 @@ project(cryptopals VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH contrib/*)
 
-file(GLOB_RECURSE SRC_FILES src/*.cpp include/*)
+file(GLOB_RECURSE SRC_FILES src/*.cpp include/*.h)
 file(GLOB_RECURSE TEST_FILES tests/*)
 
 add_subdirectory(contrib/googletest)
