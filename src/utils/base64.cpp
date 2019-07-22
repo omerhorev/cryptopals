@@ -2,7 +2,9 @@
 // Created by omerh on 16/07/2019.
 //
 
-#include "base64.h"
+#include "utils/base64.h"
+
+using namespace utils;
 
 const char base64::padd_char = '=';
 const char base64::encoded_char_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
