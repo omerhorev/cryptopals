@@ -16,7 +16,6 @@ TEST(sets, set_1_1)
     char hex_decoded[256];
 
     auto decoded_length = hex::decode(test_vector_hex, strlen(test_vector_hex), decoded, sizeof(decoded));
-    printf("%s", (char*)decoded);
     base64::encode(decoded, decoded_length, base_64_decoded, sizeof(base_64_decoded));
 
     ASSERT_STREQ(test_vector_base64, base_64_decoded);
