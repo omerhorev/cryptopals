@@ -2,7 +2,9 @@
 // Created by omerh on 20/07/2019.
 //
 
-#include <hex.h>
+#include <utils/hex.h>
+
+using namespace utils;
 
 size_t hex::decode(const char hex[], size_t length, unsigned char buffer[], size_t buffer_length)
 {

@@ -2,9 +2,11 @@
 // Created by omerh on 20/07/2019.
 //
 
-#include <hex.h>
-#include <base64.h>
+#include <utils/hex.h>
+#include <utils/base64.h>
 #include "gtest/gtest.h"
+
+using namespace utils;
 
 TEST(sets, set_1_1)
 {

@@ -2,8 +2,10 @@
 // Created by omerh on 20/07/2019.
 //
 
-#include <hex.h>
+#include <utils/hex.h>
 #include "gtest/gtest.h"
+
+using namespace utils;
 
 TEST(hex, encoding)
 {

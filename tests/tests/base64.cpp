@@ -5,8 +5,9 @@
 #include <iterator>
 #include <cstring>
 #include "gtest/gtest.h"
-#include "base64.h"
+#include "utils/base64.h"
 
+using namespace utils;
 
 TEST(base64, test_vectors)
 {
