@@ -16,3 +16,8 @@ add_executable(ctyptopals-tests ${SRC_FILES} ${TEST_FILES})
 
 target_link_libraries(ctyptopals-tests gtest gtest_main)
 add_test(ctyptopals-tests ctyptopals-tests)
+
+
+add_custom_command(TARGET ctyptopals-tests PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/data/env $<TARGET_FILE_DIR:ctyptopals-tests>/data)
