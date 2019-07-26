@@ -21,12 +21,21 @@ namespace breaks
          */
         void single_xor_cipher_break(const unsigned char cipher[],
                                      size_t cipher_length,
-                                     char& o_key);
+                                     char &o_key);
 
-    private:
-
-        void xor_with_key(const unsigned char cipher[], size_t, unsigned char plain[], unsigned char k);
-
+        /**
+         * Breaks the single xor cipher given the cipher is in english alphabet
+         *
+         * @param cipher        The cipher data
+         * @param cipher_length The length of the encrypted data
+         * @param o_key         The key extracted
+         * @param o_accuracy    The accuracy of the decryption. The higher the number the more certain we are that we
+         *                      got the actual key.
+         */
+        void single_xor_cipher_break(const unsigned char cipher[],
+                                     size_t cipher_length,
+                                     char &o_key,
+                                     float &o_accuracy);
     };
 }
 
