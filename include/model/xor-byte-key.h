@@ -22,6 +22,12 @@ namespace model
          */
         static void decrypt(const unsigned char cipher[], unsigned char plain[], size_t length, unsigned char key);
 
+        static void decrypt(const unsigned char cipher[],
+                            unsigned char plain[],
+                            size_t length,
+                            const unsigned char key[],
+                            size_t key_length);
+
         /**
          * Encrypts with a single byte xor encryption
          *
@@ -32,8 +38,24 @@ namespace model
          */
         static void encrypt(const unsigned char plain[], unsigned char cipher[], size_t length, unsigned char key);
 
+        static void encrypt(const unsigned char plain[],
+                            unsigned char cipher[],
+                            size_t length,
+                            const unsigned char key[],
+                            size_t key_length);
+
     private:
-        static void xor_single_byte_key(const unsigned char src[], unsigned char dst[], size_t length, unsigned char key);
+        static void xor_single_byte_key(const unsigned char src[],
+                                        unsigned char dst[],
+                                        size_t length,
+                                        unsigned char key);
+
+        static void xor_repeating_key(const unsigned char src[],
+                                      unsigned char dst[],
+                                      size_t length,
+                                      const unsigned char key[],
+                                      size_t key_length);
+
     public:
     };
 }
