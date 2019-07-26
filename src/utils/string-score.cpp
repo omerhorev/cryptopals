@@ -6,12 +6,12 @@
 #include <algorithm>
 #include <array>
 #include <numeric>
+#include <cmath>
 
 using namespace utils;
 
 float string_score::score_by_frequency(const char string[], size_t length)
 {
-    size_t total_valid_letters = 0;
     float score = 1;
     std::array<float, 0x100> chars_percent = {0};
     std::array<size_t, 0x100> chars_count = {0};
@@ -25,10 +25,19 @@ float string_score::score_by_frequency(const char string[], size_t length)
 
         if (predicted_count < 0 || predicted_count > length)
         {
-            if (actual_count > 0 && !isprint(c) && c != '\n')
+            if (actual_count > 0)
             {
-                // Its a not printable char, penalty!
-                score *= 0.75;
+                if (!isprint(c) && c != '\n')
+                {
+                    // Its a not printable char, penalty!
+                    score *= std::pow(0.75, actual_count);
+                }
+                else
+                {
+                    // Its a printable char without a frequency knowledge, penalty!
+                    // Its a not printable char, penalty!
+                    score *= std::pow(0.85, actual_count);
+                }
             }
         }
         else
@@ -126,9 +135,23 @@ float string_score::get_letter_english_frequency(char c)
         case 'z':
         case 'Z':
             return 0.0007;
+        case ' ':
+            return 0.2;
+        case '\'':;
+            return 0.01;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 0:
+            return 0.01;
         default:
             return -1;
     }
-    return 0;
 }
 
