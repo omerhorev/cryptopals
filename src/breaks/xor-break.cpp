@@ -6,8 +6,16 @@
 #include <cstdio>
 #include <utils/string-score.h>
 #include <cstring>
+#include <model/xor-byte-key.h>
 
 void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, char &o_key)
+{
+    float _;
+    single_xor_cipher_break(cipher, cipher_length, o_key, _);
+}
+
+void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, char &o_key,
+                                                float &o_accuracy)
 {
     auto plain = new unsigned char[cipher_length + 1];
     float highest_score = 0;
@@ -19,7 +27,7 @@ void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, siz
     {
         auto k = (unsigned char) i;
 
-        xor_with_key(cipher, cipher_length, plain, k);
+        model::xor_byte_key::decrypt(cipher, plain, cipher_length, k);
 
         float score = utils::string_score::score_by_frequency((const char *) plain, cipher_length);
 
@@ -27,17 +35,10 @@ void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, siz
         {
             highest_score = score;
             o_key = k;
+            o_accuracy = score;
         }
     }
 
     delete[]plain;
-}
-
-void breaks::xor_break::xor_with_key(const unsigned char *cipher, size_t length, unsigned char *plain, unsigned char k)
-{
-    for (int i = 0; i < length; ++i)
-    {
-        plain[i] = cipher[i] ^ k;
-    }
 }
 
