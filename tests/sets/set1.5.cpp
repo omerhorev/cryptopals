@@ -21,4 +21,4 @@ TEST(sets, set_1_5)
 
     xor_byte_key::encrypt((const unsigned char *) plain, cipher, strlen(plain), key, sizeof(key));
     ASSERT_TRUE(memcmp(cipher, &test_vectors, sizeof(test_vectors)) == 0);
-}2
+}
