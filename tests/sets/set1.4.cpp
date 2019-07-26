@@ -23,7 +23,7 @@ TEST(sets, set_1_4)
     size_t xor_encrypted_cipher_buffer_length = 0;
 
     std::ifstream f;
-    f.open("data/sets/4/4.txt", std::fstream::in);
+    f.open("data/sets/1/4.txt", std::fstream::in);
 
     ASSERT_TRUE(f.is_open());
 
