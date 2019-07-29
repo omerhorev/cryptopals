@@ -21,7 +21,7 @@ namespace breaks
          */
         void single_xor_cipher_break(const unsigned char cipher[],
                                      size_t cipher_length,
-                                     char &o_key);
+                                     unsigned char &o_key);
 
         /**
          * Breaks the single xor cipher given the cipher is in english alphabet
@@ -34,7 +34,7 @@ namespace breaks
          */
         void single_xor_cipher_break(const unsigned char cipher[],
                                      size_t cipher_length,
-                                     char &o_key,
+                                     unsigned char &o_key,
                                      float &o_accuracy);
     };
 }

@@ -8,13 +8,13 @@
 #include <cstring>
 #include <model/xor-byte-key.h>
 
-void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, char &o_key)
+void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, unsigned char &o_key)
 {
     float _;
     single_xor_cipher_break(cipher, cipher_length, o_key, _);
 }
 
-void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, char &o_key,
+void breaks::xor_break::single_xor_cipher_break(const unsigned char *cipher, size_t cipher_length, unsigned char &o_key,
                                                 float &o_accuracy)
 {
     auto plain = new unsigned char[cipher_length + 1];

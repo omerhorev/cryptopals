@@ -13,7 +13,7 @@ using namespace utils;
 TEST(sets, set_1_3)
 {
     unsigned char data1[34];
-    char key = 0;
+    unsigned char key = 0;
 
     hex::decode("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736", 68, data1, sizeof(data1));
 

@@ -16,7 +16,12 @@ float string_score::score_by_frequency(const char string[], size_t length)
     std::array<float, 0x100> chars_percent = {0};
     std::array<size_t, 0x100> chars_count = {0};
 
-    for (int i = 0; i < length; ++i) chars_count[string[i]]++;
+    for (int i = 0; i < length; ++i)
+    {
+        auto char_index = ((unsigned int) string[i]) % 0xff;
+        chars_count[char_index]++;
+    }
+
     for (int j = 0; j < 0x100; ++j)
     {
         auto c = (char) j;
@@ -139,16 +144,16 @@ float string_score::get_letter_english_frequency(char c)
             return 0.2;
         case '\'':;
             return 0.01;
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 0:
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
             return 0.01;
         default:
             return -1;
