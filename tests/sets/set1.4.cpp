@@ -32,7 +32,7 @@ TEST(sets, set_1_4)
     while(read_length > 0)
     {
         float a;
-        char k;
+        unsigned char k;
 
         b.single_xor_cipher_break(read_buffer, (size_t)(read_length), k, a);
 
