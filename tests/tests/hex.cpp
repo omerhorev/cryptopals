@@ -7,7 +7,7 @@
 
 using namespace utils;
 
-TEST(utils, hex_encoding)
+TEST(hex, encoding)
 {
     const char *test_vector[][2] = {
             {"",              ""},

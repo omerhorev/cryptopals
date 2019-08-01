@@ -9,7 +9,7 @@
 
 using namespace utils;
 
-TEST(utils, base64_test_vectors)
+TEST(base64, test_vectors)
 {
     const char *test_vector[][2] = {
             {"",              ""},
