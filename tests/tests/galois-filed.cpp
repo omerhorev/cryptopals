@@ -19,3 +19,13 @@ TEST(galois_filed, multiplication)
     ASSERT_EQ(galois::mul(10, 26), 228);
     ASSERT_EQ(galois::mul(7, 11), 49);
 }
+
+TEST(galois_filed, exponent2)
+{
+    ASSERT_EQ(galois::exponent2(0), 1);
+    ASSERT_EQ(galois::exponent2(1), 2);
+    ASSERT_EQ(galois::exponent2(2), galois::mul(2, 2));
+    ASSERT_EQ(galois::exponent2(3), galois::mul(2, galois::mul(2, 2)));
+    ASSERT_EQ(galois::exponent2(4), galois::mul(2, galois::mul(2, galois::mul(2, 2))));
+    ASSERT_EQ(galois::exponent2(5), galois::mul(2, galois::mul(2, galois::mul(2, galois::mul(2, 2)))));
+}

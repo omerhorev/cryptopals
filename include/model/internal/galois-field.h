@@ -46,6 +46,18 @@ namespace model
 
                 return p;
             }
+
+            static unsigned char exponent2(unsigned char a)
+            {
+                unsigned char p = 1;
+
+                for (int i = 0; i < a; ++i)
+                {
+                    p = mul(p, 2);
+                }
+
+                return p;
+            }
         };
     }
 }
