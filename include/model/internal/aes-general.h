@@ -1,8 +1,0 @@
-//
-// Created by omerh on 01/08/2019.
-//
-
-#ifndef CRYPTOPALS_AES_GENERAL_H
-#define CRYPTOPALS_AES_GENERAL_H
-
-#endif //CRYPTOPALS_AES_GENERAL_H

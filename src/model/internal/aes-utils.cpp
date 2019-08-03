@@ -10,15 +10,15 @@ using namespace model;
 using namespace model::internal;
 
 
-void aes_utils::expand_key(unsigned char *root,
-                           size_t root_length,
-                           unsigned char *expanded_key,
-                           size_t expanded_key_length)
+void aes_utils::generate_key_schedule(const unsigned char *root_key,
+                                      size_t root_key_length,
+                                      unsigned char *expanded_key,
+                                      size_t expanded_key_length)
 {
-    for (int i = 0; i < root_length; ++i) expanded_key[i] = root[i];
+    for (int i = 0; i < root_key_length; ++i) expanded_key[i] = root_key[i];
 
     unsigned char pow_index = 0;
-    unsigned int write_index = 16; // We start with 16 because we already copied 16 bytes of root key to the expanded
+    auto write_index = root_key_length; // We start with 16 because we already copied 16 bytes of root key to the expanded
 
     while (write_index < expanded_key_length)
     {
@@ -30,15 +30,27 @@ void aes_utils::expand_key(unsigned char *root,
         }
 
         // If its the first 4 bytes in the 16 bytes block
-        if (write_index % 16 == 0)
+        if (write_index % root_key_length == 0)
         {
-            expantion_core(t, pow_index);
+            aes_utils::circular_rotate(t);
+
+            for (int j = 0; j < 4; ++j)
+            {
+                t[j] = sbox(t[j]);
+            }
+
+            t[0] ^= model::internal::galois::exponent2(pow_index);
             pow_index += 1;
+        }
+
+        if (root_key_length == 32 && write_index % root_key_length == 16)
+        {
+            for (unsigned char &i : t) i = sbox(i);
         }
 
         for (int k = 0; k < 4; ++k)
         {
-            expanded_key[write_index] = expanded_key[write_index - 16] ^ t[k];
+            expanded_key[write_index] = expanded_key[write_index - root_key_length] ^ t[k];
             write_index += 1;
         }
     }
@@ -57,19 +69,6 @@ void aes_utils::circular_rotate(unsigned char data[])
 
     data[3] = a;
 }
-
-void aes_utils::expantion_core(unsigned char data[], unsigned int index)
-{
-    aes_utils::circular_rotate(data);
-
-    for (int j = 0; j < 4; ++j)
-    {
-        data[j] = sbox(data[j]);
-    }
-
-    data[0] ^= model::internal::galois::exponent2((unsigned char) index);
-}
-
 const unsigned char aes_utils::sbox_table[256] =
         {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
          0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,

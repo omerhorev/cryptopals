@@ -16,18 +16,34 @@ namespace model
         {
         public:
 
+            /**\
+             * Generates set of round keys according to the aes flavor specified
+             * @tparam Flavor The AES flavor (can be aes_flavor_aes128/aes_flavor_aes192/aes_flavor_aes256)
+             * @param key   The root key to expand into round keys
+             * @param o_round_keys  (output) The round keys
+             */
             template<typename Flavor>
-            static void generate_round_keys(unsigned char key[Flavor::key_size], aes_round_keys<Flavor> &keys)
+            static void generate_round_keys(const unsigned char *key, aes_round_keys<Flavor> &o_round_keys)
             {
-                expand_key(key, Flavor::key_size, (unsigned char *) keys.round_keys, sizeof(keys.round_keys));
+                generate_key_schedule(key, Flavor::key_size, (unsigned char *) o_round_keys.round_keys,
+                                      sizeof(o_round_keys.round_keys));
             }
 
 
         private:
-            static void expand_key(unsigned char root[],
-                                   size_t root_length,
-                                   unsigned char expanded_key[],
-                                   size_t expanded_key_length);
+
+            /**
+             * Generates a key schedule
+             *
+             * @param root_key                The root key
+             * @param root_key_length         The root key length (can be 16/24/32)
+             * @param expanded_key        (output) The expanded key (can be 176/208/240)
+             * @param expanded_key_length The length of the expanded key buffer
+             */
+            static void generate_key_schedule(const unsigned char *root_key,
+                                              size_t root_key_length,
+                                              unsigned char *expanded_key,
+                                              size_t expanded_key_length);
 
             /**
              * Rotates a 4 byte array (32 bit) one byte (8 bit) to the left
@@ -36,15 +52,10 @@ namespace model
             static void circular_rotate(unsigned char data[]);
 
             /**
-             * The core operation of the generation. This will be called according to the Rijndael's key generation
-             * scheme.
-             *
-             * @param input  4 byte buffer
-             * @param output (output) 4 byte buffer
-             * @param index  The index of the operation
+             * Performs an sbox operation in a given char using the sbox table
+             * @param v  The char to perform sbox on
+             * @return   (unsigned char) The result
              */
-            static void expantion_core(unsigned char data[], unsigned int index);
-
             static unsigned char sbox(unsigned char v);
 
             static const unsigned char sbox_table[256];

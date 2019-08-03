@@ -40,13 +40,16 @@ namespace model
                     {
                         a ^= 0x1b;
                     }
-
-
                 }
 
                 return p;
             }
 
+            /**
+             * Raise to 2 to the exponent of a, in a finite field 2^8
+             * @param a The number to raise 2 to the exponent to
+             * @return (unsigned char) The result.
+             */
             static unsigned char exponent2(unsigned char a)
             {
                 unsigned char p = 1;

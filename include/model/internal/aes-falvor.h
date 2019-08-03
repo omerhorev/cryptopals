@@ -17,6 +17,20 @@ namespace model
             static constexpr size_t rounds_count = 10;
             static constexpr size_t key_size = 16;
         };
+
+        class aes_flavor_aes192
+        {
+        public:
+            static constexpr size_t rounds_count = 12;
+            static constexpr size_t key_size = 24;
+        };
+
+        class aes_flavor_aes256
+        {
+        public:
+            static constexpr size_t rounds_count = 14;
+            static constexpr size_t key_size = 32;
+        };
     }
 }
 
