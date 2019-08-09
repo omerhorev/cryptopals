@@ -9,7 +9,7 @@
 using namespace model;
 using namespace model::internal;
 
-TEST(aes128, round_keys)
+TEST(aes, round_keys_128)
 {
     struct
     {
@@ -46,7 +46,7 @@ TEST(aes128, round_keys)
     }
 }
 
-TEST(aes192, round_keys)
+TEST(aes, round_keys_192)
 {
     struct
     {
@@ -79,7 +79,7 @@ TEST(aes192, round_keys)
     }
 }
 
-TEST(aes256, round_keys)
+TEST(aes, round_keys_256)
 {
     struct
     {

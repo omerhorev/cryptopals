@@ -7,8 +7,8 @@
 
 using namespace utils;
 
-size_t general::xorBuffers(const unsigned char *data1, size_t length1, const unsigned char *data2, size_t length2,
-                         unsigned char *result, size_t result_length)
+size_t general::xor_buffers(const unsigned char *data1, size_t length1, const unsigned char *data2, size_t length2,
+                            unsigned char *result, size_t result_length)
 {
     if (length1 != length2 || length2 != result_length || result_length != length1)
     {

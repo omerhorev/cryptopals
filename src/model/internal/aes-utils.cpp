@@ -17,7 +17,8 @@ void aes_utils::generate_key_schedule(const unsigned char *root_key,
 {
     for (int i = 0; i < root_key_length; ++i) expanded_key[i] = root_key[i];
 
-    unsigned char pow_index = 0;
+    galois256 pow_index(0);
+    galois256 two(2);
     auto write_index = root_key_length; // We start with 16 because we already copied 16 bytes of root key to the expanded
 
     while (write_index < expanded_key_length)
@@ -32,43 +33,55 @@ void aes_utils::generate_key_schedule(const unsigned char *root_key,
         // If its the first 4 bytes in the 16 bytes block
         if (write_index % root_key_length == 0)
         {
-            aes_utils::circular_rotate(t);
+            aes_utils::circular_rotate_left(t, sizeof(t), 1);
 
             for (int j = 0; j < 4; ++j)
             {
                 t[j] = sbox(t[j]);
             }
 
-            t[0] ^= model::internal::galois::exponent2(pow_index);
-            pow_index += 1;
+            t[0] ^= (unsigned char) (two ^ pow_index);
+            pow_index++;
         }
 
-        if (root_key_length == 32 && write_index % root_key_length == 16)
+        if (root_key_length == 32 && write_index % root_key_length == block_size)
         {
             for (unsigned char &i : t) i = sbox(i);
         }
 
-        for (int k = 0; k < 4; ++k)
+        for (unsigned char k : t)
         {
-            expanded_key[write_index] = expanded_key[write_index - root_key_length] ^ t[k];
-            write_index += 1;
+            expanded_key[write_index] = expanded_key[write_index - root_key_length] ^ k;
+            write_index++;
         }
     }
 }
 
-void aes_utils::circular_rotate(unsigned char data[])
+void aes_utils::circular_rotate_left(unsigned char *buffer, size_t length, unsigned int offset)
 {
     unsigned char a;
 
-    a = data[0];
+    offset = (unsigned int) (offset % length);
 
-    for (int i = 0; i < 3; ++i)
+    auto temp = new unsigned char[length];
+
+    a = buffer[0];
+
+    for (int i = 0; i < length; ++i)
     {
-        data[i] = data[i + 1];
+        temp[i] = buffer[(i + offset) % length];
     }
 
-    data[3] = a;
+    for (int i = 0; i < length; i++)
+    {
+        buffer[i] = temp[i];
+    }
+
+    delete[] temp;
+
+    buffer[3] = a;
 }
+
 const unsigned char aes_utils::sbox_table[256] =
         {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
          0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
