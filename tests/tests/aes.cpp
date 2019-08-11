@@ -3,8 +3,10 @@
 //
 
 #include <gtest/gtest.h>
+#include "utils/debug.h"
 #include "model/internal/aes-utils.h"
 #include "model/internal/aes-falvor.h"
+#include "model/internal/aes.h"
 
 using namespace model;
 using namespace model::internal;
@@ -42,7 +44,7 @@ TEST(aes, round_keys_128)
         aes_utils::generate_round_keys<aes_flavor_aes128>(test_vector.key, round_keys);
 
         ASSERT_EQ(aes_round_keys<aes_flavor_aes128>::round_keys_count * 16, sizeof(test_vector.expended));
-        ASSERT_TRUE(memcmp(round_keys.round_keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
+        ASSERT_TRUE(memcmp(round_keys.keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
     }
 }
 
@@ -75,7 +77,7 @@ TEST(aes, round_keys_192)
         aes_utils::generate_round_keys<aes_flavor_aes192>(test_vector.key, round_keys);
 
         ASSERT_EQ(aes_round_keys<aes_flavor_aes192>::round_keys_count * 16, sizeof(test_vector.expended));
-        ASSERT_TRUE(memcmp(round_keys.round_keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
+        ASSERT_TRUE(memcmp(round_keys.keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
     }
 }
 
@@ -108,6 +110,30 @@ TEST(aes, round_keys_256)
         aes_utils::generate_round_keys<aes_flavor_aes256>(test_vector.key, round_keys);
 
         ASSERT_EQ(aes_round_keys<aes_flavor_aes256>::round_keys_count * 16, sizeof(test_vector.expended));
-        ASSERT_TRUE(memcmp(round_keys.round_keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
+        ASSERT_TRUE(memcmp(round_keys.keys, test_vector.expended, sizeof(test_vector.expended)) == 0);
+    }
+}
+
+TEST(aes, encryption)
+{
+    struct
+    {
+        unsigned char key[16];
+        unsigned char plain[16];
+        unsigned char crypt[16];
+    } test_vector[] = {
+            {
+                    {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,},
+                    {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,},
+                    {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30, 0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a,}
+            }
+    };
+
+    for (auto &v : test_vector)
+    {
+        aes<aes_flavor_aes128> m;
+        m.set_key(v.key);
+        m.encrypt(v.plain);
+        ASSERT_TRUE(memcmp(v.plain, v.crypt, sizeof(v.plain)) == 0);
     }
 }

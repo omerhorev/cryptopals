@@ -6,8 +6,9 @@
 #define CRYPTOPALS_AES_UTILS_H
 
 #include <cstddef>
+#include <utils/debug.h>
 #include "utils/general.h"
-#include "galois-field.h"
+#include "math/galois-field.h"
 #include "aes-round-keys.h"
 
 namespace model
@@ -27,6 +28,7 @@ namespace model
             {
                 unsigned char raw[block_size];
                 unsigned char matrix[state_rows_count][state_cols_count];
+                math::galois256 gmatrix[state_rows_count][state_cols_count];
             };
         public:
 
@@ -39,8 +41,8 @@ namespace model
             template<typename Flavor>
             static void generate_round_keys(const unsigned char *key, aes_round_keys<Flavor> &o_round_keys)
             {
-                generate_key_schedule(key, Flavor::key_size, (unsigned char *) o_round_keys.round_keys,
-                                      sizeof(o_round_keys.round_keys));
+                generate_key_schedule(key, Flavor::key_size, (unsigned char *) o_round_keys.keys,
+                                      sizeof(o_round_keys.keys));
             }
 
             /**
@@ -52,58 +54,71 @@ namespace model
              * @param round_keys The round keys to use
              */
             template<typename Flavor>
-            void encrypt(const unsigned char block[], size_t length, aes_round_keys<Flavor> round_keys)
+            static void encrypt(const unsigned char block[], size_t length, aes_round_keys<Flavor> round_keys)
             {
                 state s = {0};
 
-                add_round_key(s, round_keys[0]);
+                std::copy(block, block+ block_size, s.raw);
+
+                add_round_key(s, round_keys.keys[0]);
 
                 for (auto i = 0; i < Flavor::rounds_count - 1; i++)
                 {
                     sub_bytes(s);
                     shift_rows(s);
-                    // mix_culumns();
-                    add_round_key(s, round_keys[i + 1]);
+                    mix_columns(s);
+                    add_round_key(s, round_keys.keys[i + 1]);
                 }
 
                 sub_bytes(s);
                 shift_rows(s);
-                add_round_key(s, round_keys[Flavor::rounds_count - 1]);
+                add_round_key(s, round_keys.keys[Flavor::rounds_count - 1]);
             }
 
-        public:
-
-            void add_round_key(state &s, const unsigned char (&round_key)[aes_utils::block_size])
+            static void add_round_key(state &s, const unsigned char (&round_key)[aes_utils::block_size])
             {
                 utils::general::xor_buffers(s.raw, round_key, s.raw);
             }
 
-            void sub_bytes(state &s)
+            static void sub_bytes(state &s)
             {
                 for (auto &c : s.raw) c = sbox(c);
             }
 
-            void shift_rows(state &s)
+            static void shift_rows(state &s)
             {
                 for (unsigned int r = 0; r < state_rows_count; ++r)
                 {
-                    auto &row = s.matrix[r];
+                    unsigned char row[4];
+                    for (int i = 0; i < 4; ++i) row[i] = s.matrix[i][r];
 
-                    circular_rotate_left(row, 0, r);
+                    circular_rotate_left(row, sizeof(row), r);
+
+                    for (int i = 0; i < 4; ++i) s.matrix[i][r] = row[i];
                 }
             }
 
-            void mix_columns(state &s)
+            static void mix_columns(state &s)
             {
-                for (int c = 0; c < state_cols_count; c++)
+                for (auto &c : s.gmatrix)
                 {
-                    unsigned char temp_col[state_cols_count];
-
-                    /*temp_col[0] = gmul(a[0], 2) ^ gmul(a[3], 1) ^ gmul(a[2], 1) ^ gmul(a[1], 3);
-                    temp_col[1] = gmul(a[1], 2) ^ gmul(a[0], 1) ^ gmul(a[3], 1) ^ gmul(a[2], 3);
-                    temp_col[2] = gmul(a[2], 2) ^ gmul(a[1], 1) ^ gmul(a[0], 1) ^ gmul(a[3], 3);
-                    temp_col[3] = gmul(a[3], 2) ^ gmul(a[2], 1) ^ gmul(a[1], 1) ^ gmul(a[0], 3);*/
+                    mix_column(c);
                 }
+            }
+
+            static void mix_column(math::galois256 (&column)[4])
+            {
+                math::galois256 a[4];
+
+                for (auto c = 0; c < 4; c++)
+                {
+                    a[c] = column[c];
+                }
+
+                column[0] = (a[0] * 2) + (a[3] * 1) + (a[2] * 1) + (a[1] * 3);
+                column[1] = (a[1] * 2) + (a[0] * 1) + (a[3] * 1) + (a[2] * 3);
+                column[2] = (a[2] * 2) + (a[1] * 1) + (a[0] * 1) + (a[3] * 3);
+                column[3] = (a[3] * 2) + (a[2] * 1) + (a[1] * 1) + (a[0] * 3);
             }
 
             /**

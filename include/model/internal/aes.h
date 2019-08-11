@@ -18,7 +18,7 @@ namespace model
         {
         public:
 
-            aes() : _round_keys(0)
+            aes() : _round_keys({0})
             {}
 
             /**
@@ -28,18 +28,7 @@ namespace model
              */
             void set_key(const unsigned char (&key)[Flavor::key_size])
             {
-                set_key(&key, sizeof(key));
-            }
-
-            /**
-             * Sets the key for the aes encryption
-             *
-             * @param key    The key yo set
-             * @param length The length of the key to set
-             */
-            void set_key(const unsigned char key[], size_t length)
-            {
-                aes_utils::generate_round_keys(key, length, _round_keys);
+                aes_utils::generate_round_keys(key, _round_keys);
             }
 
             /**
@@ -49,7 +38,7 @@ namespace model
              */
             void encrypt(const unsigned char (&block)[aes_utils::block_size])
             {
-                encrypt(block, aes_utils::block_size);
+                aes_utils::encrypt(block, aes_utils::block_size, _round_keys);
             }
 
         private:

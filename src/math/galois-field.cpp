@@ -2,12 +2,11 @@
 // Created by omerh on 09/08/2019.
 //
 
-#include <model/internal/galois-field.h>
+#include <math/galois-field.h>
 
-#include "model/internal/galois-field.h"
+#include "math/galois-field.h"
 
-using namespace model;
-using namespace model::internal;
+using namespace math;
 
 galois256 galois256::operator+(galois256 v) const
 {
@@ -81,6 +80,18 @@ const galois256 galois256::operator++(int)
 {
     galois256 temp = *this;
     _value++;
-    
+
     return temp;
+}
+
+galois256 galois256::operator*(const unsigned char v) const
+{
+    return *this * galois256(v);
+}
+
+galois256 &galois256::operator=(unsigned char v)
+{
+    _value = v;
+
+    return *this;
 }

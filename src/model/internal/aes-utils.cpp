@@ -2,13 +2,13 @@
 // Created by omerh on 01/08/2019.
 //
 
-#include <model/internal/aes-utils.h>
-#include <model/internal/galois-field.h>
 #include <cstring>
+#include "model/internal/aes-utils.h"
+#include "math/galois-field.h"
 
 using namespace model;
 using namespace model::internal;
-
+using namespace math;
 
 void aes_utils::generate_key_schedule(const unsigned char *root_key,
                                       size_t root_key_length,
@@ -35,9 +35,9 @@ void aes_utils::generate_key_schedule(const unsigned char *root_key,
         {
             aes_utils::circular_rotate_left(t, sizeof(t), 1);
 
-            for (int j = 0; j < 4; ++j)
+            for (unsigned char &j : t)
             {
-                t[j] = sbox(t[j]);
+                j = sbox(j);
             }
 
             t[0] ^= (unsigned char) (two ^ pow_index);
@@ -59,13 +59,9 @@ void aes_utils::generate_key_schedule(const unsigned char *root_key,
 
 void aes_utils::circular_rotate_left(unsigned char *buffer, size_t length, unsigned int offset)
 {
-    unsigned char a;
-
     offset = (unsigned int) (offset % length);
 
     auto temp = new unsigned char[length];
-
-    a = buffer[0];
 
     for (int i = 0; i < length; ++i)
     {
@@ -78,8 +74,6 @@ void aes_utils::circular_rotate_left(unsigned char *buffer, size_t length, unsig
     }
 
     delete[] temp;
-
-    buffer[3] = a;
 }
 
 const unsigned char aes_utils::sbox_table[256] =

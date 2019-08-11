@@ -4,11 +4,10 @@
 
 #include <gtest/gtest.h>
 #include "utils/hex.h"
-#include "model/internal/galois-field.h"
+#include "math/galois-field.h"
 
 using namespace utils;
-using namespace model;
-using namespace model::internal;
+using namespace math;
 
 TEST(galois_field, multiplication)
 {
