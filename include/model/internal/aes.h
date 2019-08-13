@@ -36,9 +36,19 @@ namespace model
              *
              * @param block The block to encrypt
              */
-            void encrypt(const unsigned char (&block)[aes_utils::block_size])
+            void encrypt(unsigned char (&block)[aes_utils::block_size])
             {
                 aes_utils::encrypt(block, aes_utils::block_size, _round_keys);
+            }
+
+            /**
+             * Encrypts a block of data
+             *
+             * @param block The block to encrypt
+             */
+            void decrypt(unsigned char (&block)[aes_utils::block_size])
+            {
+                aes_utils::decrypt(block, aes_utils::block_size, _round_keys);
             }
 
         private:
