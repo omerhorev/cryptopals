@@ -10,7 +10,7 @@
 #include <string>
 #include <utils/base64.h>
 
-size_t utils::files::read_hex_line(std::istream& f, unsigned char o_buffer[], size_t buffer_length)
+size_t utils::files::read_hex_line(std::istream &f, unsigned char o_buffer[], size_t buffer_length)
 {
     std::string s;
 
@@ -21,7 +21,7 @@ size_t utils::files::read_hex_line(std::istream& f, unsigned char o_buffer[], si
         return 0;
     }
 
-    while(true)
+    while (true)
     {
         auto last = s[s.length() - 1];
         if (last != '\r' && last != ' ' && last != '\n')
