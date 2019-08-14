@@ -3,11 +3,12 @@
 //
 
 #include <cstring>
-#include "model/internal/aes-utils.h"
+#include "model/internal/aes/aes-utils.h"
 #include "math/galois-field.h"
 
 using namespace model;
 using namespace model::internal;
+using namespace model::internal::aes;
 using namespace math;
 
 void aes_utils::generate_key_schedule(const unsigned char *root_key,

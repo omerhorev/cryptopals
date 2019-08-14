@@ -4,12 +4,13 @@
 
 #include <gtest/gtest.h>
 #include "utils/debug.h"
-#include "model/internal/aes-utils.h"
-#include "model/internal/aes-falvor.h"
-#include "model/internal/aes.h"
+#include "model/internal/aes/aes-utils.h"
+#include "model/internal/aes/aes-falvor.h"
+#include "model/internal/aes/aes.h"
 
 using namespace model;
 using namespace model::internal;
+using namespace model::internal::aes;
 
 TEST(aes, round_keys_128)
 {
@@ -151,7 +152,7 @@ TEST(aes, enc_dec_128)
 
     for (auto &v : test_vector)
     {
-        aes<aes_flavor_aes128> m;
+        aes_model<aes_flavor_aes128> m;
         unsigned char temp[aes_utils::block_size];
 
         std::copy(v.plain, v.plain + aes_utils::block_size, temp);
@@ -197,7 +198,7 @@ TEST(aes, enc_dec_192)
 
     for (auto &v : test_vector)
     {
-        aes<aes_flavor_aes192> m;
+        aes_model<aes_flavor_aes192> m;
         unsigned char temp[aes_utils::block_size];
 
         std::copy(v.plain, v.plain + aes_utils::block_size, temp);
@@ -243,7 +244,7 @@ TEST(aes, enc_dec_256)
 
     for (auto &v : test_vector)
     {
-        aes<aes_flavor_aes256> m;
+        aes_model<aes_flavor_aes256> m;
         unsigned char temp[aes_utils::block_size];
 
         std::copy(v.plain, v.plain + aes_utils::block_size, temp);
