@@ -10,7 +10,7 @@
 
 using namespace utils;
 
-TEST(utils, files_read_hex)
+TEST(files, read_hex_line)
 {
     const size_t max_buffer_length = 256;
     unsigned char read_buffer[max_buffer_length] = {0};

@@ -25,12 +25,12 @@ namespace utils
          * @param result_length The length of the result
          * @return (size_t) The number of bytes got xor'ed
          */
-        static size_t xorBuffers(const unsigned char data1[],
-                                 size_t length1,
-                                 const unsigned char data2[],
-                                 size_t length2,
-                                 unsigned char result[],
-                                 size_t result_length);
+        static size_t xor_buffers(const unsigned char *data1,
+                                  size_t length1,
+                                  const unsigned char *data2,
+                                  size_t length2,
+                                  unsigned char *result,
+                                  size_t result_length);
 
         /**
          * XOR some buffers and put it in the result
@@ -42,11 +42,11 @@ namespace utils
          * @return (size_t) The number of bytes got xor'ed
          */
         template<size_t N>
-        static size_t xorBuffers(const unsigned char (&data1)[N],
-                                 const unsigned char (&data2)[N],
-                                 unsigned char (&result)[N])
+        static size_t xor_buffers(const unsigned char (&data1)[N],
+                                  const unsigned char (&data2)[N],
+                                  unsigned char (&result)[N])
         {
-            return xorBuffers(data1, N, data2, N, result, N);
+            return xor_buffers(data1, N, data2, N, result, N);
         }
     };
 }

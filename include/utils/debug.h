@@ -7,15 +7,50 @@
 
 #include <array>
 #include "hex.h"
+#include <iostream>
 
-template <size_t N>
-auto constexpr h2b(const char (&text)[N])
+namespace utils
 {
-    const size_t l = (N - N%2);
-    std::array<char, l/2> a { ._M_elems = {0}};
-    utils::hex::decode(text, l, (unsigned char*)&a, l/2);
+    namespace internal
+    {
+        struct hex_string
+        {
+            unsigned char *data;
+            size_t length;
+        };
+    }
 
-    return a;
+    template<size_t N>
+    auto constexpr h2b(const char (&text)[N])
+    {
+        const size_t l = (N - N % 2);
+        std::array<char, l / 2> a{._M_elems = {0}};
+        utils::hex::decode(text, l, (unsigned char *) &a, l / 2);
+
+        return a;
+    }
+
+    template<size_t N>
+    auto constexpr print_buffer(const unsigned char (&data)[N])
+    {
+        char *string = new char[N * 2 + 1];
+
+        string[N * 2] = 0;
+
+        hex::encode(data, N, string, N * 2);
+
+        std::cout << string << " (" << N << "b)" << std::endl;
+
+        delete[] string;
+    }
+
+    template<size_t N>
+    auto constexpr print_buffer(const char* name, const unsigned char (&data)[N])
+    {
+        std::cout << name << ": ";
+
+        print_buffer(data);
+    }
 }
 
 #endif //CRYPTOPALS_DEBUG_H

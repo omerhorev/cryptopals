@@ -7,7 +7,7 @@
 
 using namespace utils;
 
-TEST(utils, hamming_distance)
+TEST(hamming_distance, calculate)
 {
     ASSERT_EQ(hamming_distance::calculate((const unsigned char *) "this is a test",
                                           (const unsigned char *) "wokka wokka!!!",
