@@ -21,7 +21,7 @@ TEST(sets, set_1_7)
 
     model::aes128_ecb aes;
 
-    aes.initialize(*(const unsigned char (*)[16]) key);
+    aes.initialize((const unsigned char*)key, 16);
     aes.decrypt(cipher, length);
 
     ASSERT_TRUE(memcmp((const char *) cipher, "I'm back", strlen("I'm back")) == 0);

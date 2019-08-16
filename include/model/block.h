@@ -17,6 +17,12 @@ namespace model
     {
     };
 
+    class aes128_cbc
+            : public internal::default_cbc_block_cipher<internal::aes::aes_model<internal::aes::aes_flavor_aes128>>
+    {
+    };
+
+
     class aes192_ecb
             : public internal::default_ecb_block_cipher<internal::aes::aes_model<internal::aes::aes_flavor_aes192>>
     {
