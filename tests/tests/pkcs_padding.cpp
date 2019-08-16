@@ -3,11 +3,9 @@
 //
 
 #include <gtest/gtest.h>
-#include "model/internal/padding/pkcs7.h"
+#include "model/padding.h"
 
 using namespace model;
-using namespace model::internal;
-using namespace model::internal::padding;
 
 TEST(pkcs7_padding, encode_decode)
 {
@@ -21,7 +19,7 @@ TEST(pkcs7_padding, encode_decode)
             std::copy(message, message + data_length, buffer);
 
             auto chars_to_add = block_size - (data_length % block_size);
-            auto encoded_length = pkcs7::encode(buffer, sizeof(buffer), size_t(data_length), size_t(block_size));
+            auto encoded_length = padding::pkcs7::encode(buffer, sizeof(buffer), size_t(data_length), size_t(block_size));
 
             ASSERT_EQ(encoded_length, data_length + chars_to_add)
                                         << "block_size: " << block_size << " data_length: " << data_length;
@@ -29,7 +27,7 @@ TEST(pkcs7_padding, encode_decode)
                 return c == chars_to_add;
             }));
 
-            auto actual_size = pkcs7::decode(buffer, encoded_length, block_size);
+            auto actual_size = padding::pkcs7::decode(buffer, encoded_length, block_size);
 
             ASSERT_EQ(actual_size, data_length) << "block_size: " << block_size << " data_length: " << data_length;
         }

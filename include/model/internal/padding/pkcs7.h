@@ -2,8 +2,8 @@
 // Created by omerh on 14/08/2019.
 //
 
-#ifndef CRYPTOPALS_PADDING_H
-#define CRYPTOPALS_PADDING_H
+#ifndef CRYPTOPALS_INTERNAL_PKCS7_H
+#define CRYPTOPALS_INTERNAL_PKCS7_H
 
 #include <cstddef>
 #include <algorithm>
@@ -81,4 +81,4 @@ namespace model
     }
 }
 
-#endif //CRYPTOPALS_PADDING_H
+#endif //CRYPTOPALS_INTERNAL_PKCS7_H
