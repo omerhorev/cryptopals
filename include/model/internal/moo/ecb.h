@@ -29,7 +29,7 @@ namespace model
 
                     for (int i = 0; i < length; i += 16)
                     {
-                        _model.encrypt(*(unsigned char(*)[block_size])(data + i));
+                        _model.encrypt(*(unsigned char (*)[block_size]) (data + i));
                     }
                 }
 
@@ -39,7 +39,7 @@ namespace model
 
                     for (int i = 0; i < length; i += 16)
                     {
-                        _model.decrypt(*(unsigned char(*)[block_size])(data + i));
+                        _model.decrypt(*(unsigned char (*)[block_size]) (data + i));
                     }
                 }
 

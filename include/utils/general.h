@@ -35,6 +35,23 @@ namespace utils
         /**
          * XOR some buffers and put it in the result
          *
+         * @param data1  Buffer 1.
+         * @param data2  Buffer 2.
+         * @param result The result buffer.
+         * @param length The length of all the 3 buffers.
+         * @return (size_t) The number of bytes got xor'ed.
+         */
+        static size_t xor_buffers(const unsigned char *data1,
+                                  const unsigned char *data2,
+                                  unsigned char *result,
+                                  size_t length)
+        {
+            return xor_buffers(data1, length, data2, length, result, length);
+        }
+
+        /**
+         * XOR some buffers and put it in the result
+         *
          * @tparam N     The length of all the buffer
          * @param data1  Buffer 1
          * @param data2  Buffer 2

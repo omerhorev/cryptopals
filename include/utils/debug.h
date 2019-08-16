@@ -30,22 +30,18 @@ namespace utils
         return a;
     }
 
+    void print_buffer(const unsigned char data[], size_t length);
+
+    void print_buffer(const char* name, const unsigned char data[], size_t length);
+
     template<size_t N>
-    auto constexpr print_buffer(const unsigned char (&data)[N])
+    void print_buffer(const unsigned char (&data)[N])
     {
-        char *string = new char[N * 2 + 1];
-
-        string[N * 2] = 0;
-
-        hex::encode(data, N, string, N * 2);
-
-        std::cout << string << " (" << N << "b)" << std::endl;
-
-        delete[] string;
+        print_buffer(data, N);
     }
 
     template<size_t N>
-    auto constexpr print_buffer(const char* name, const unsigned char (&data)[N])
+    void print_buffer(const char* name, const unsigned char (&data)[N])
     {
         std::cout << name << ": ";
 

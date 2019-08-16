@@ -29,11 +29,33 @@ namespace model
                 /**
                  * Sets the key for the aes encryption
                  *
-                 * @param key The key yo set
+                 * @param key    The key yo set
+                 * @param length The length of the key, must be Flavor::key_size
                  */
-                void set_key(const unsigned char (&key)[key_size])
+                void set_key(const unsigned char key[], size_t length)
                 {
+                    if (length != key_size)
+                    {
+                        return;
+                    }
+
                     aes_utils::generate_round_keys(key, _round_keys);
+                }
+
+                /**
+                 * Encrypts a block of data
+                 *
+                 * @param block  The data to encrypt
+                 * @param length The length of the data
+                 */
+                void encrypt(unsigned char block[], size_t length)
+                {
+                    if (length != block_size)
+                    {
+                        return;
+                    }
+
+                    aes_utils::encrypt(block, aes_utils::block_size, _round_keys);
                 }
 
                 /**
@@ -44,6 +66,22 @@ namespace model
                 void encrypt(unsigned char (&block)[block_size])
                 {
                     aes_utils::encrypt(block, aes_utils::block_size, _round_keys);
+                }
+
+                /**
+                 * Encrypts a block of data
+                 *
+                 * @param block  The data to encrypt
+                 * @param length The length of the data
+                 */
+                void decrypt(unsigned char block[], size_t length)
+                {
+                    if (length != block_size)
+                    {
+                        return;
+                    }
+
+                    aes_utils::decrypt(block, aes_utils::block_size, _round_keys);
                 }
 
                 /**
