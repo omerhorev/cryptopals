@@ -20,7 +20,7 @@ TEST(sets, set_1_8)
 
     for (auto& line : data)
     {
-        if (breaks::moo_detector::is_ecb(line))
+        if (breaks::moo_detector::is_ecb(line, 160, 16))
         {
             found_ecb_mode = true;
         }

@@ -39,8 +39,6 @@ namespace model
                     {
                         _state[i] = iv[i];
                     }
-
-                    utils::print_buffer("iv", iv, length);
                 }
 
                 void encrypt(unsigned char *data, size_t length)

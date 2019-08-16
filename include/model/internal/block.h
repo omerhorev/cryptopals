@@ -16,6 +16,9 @@ namespace model
         class default_ecb_block_cipher
         {
         public:
+            static const size_t block_size = Model::block_size;
+            static const size_t key_size = Model::key_size;
+
             template<typename ...Args>
             default_ecb_block_cipher(Args... args) : _model(args...), _moo(_model)
             {}
@@ -61,6 +64,9 @@ namespace model
         class default_cbc_block_cipher
         {
         public:
+            static const size_t block_size = Model::block_size;
+            static const size_t key_size = Model::key_size;
+
             template<typename ...Args>
             default_cbc_block_cipher(Args... args) : _model(args...), _moo(_model)
             {}
