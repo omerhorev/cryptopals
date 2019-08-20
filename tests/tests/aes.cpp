@@ -203,7 +203,7 @@ TEST(aes, enc_dec_192)
 
         std::copy(v.plain, v.plain + aes_utils::block_size, temp);
 
-        m.set_key(v.key, aes_flavor_aes128::key_size);
+        m.set_key(v.key, aes_flavor_aes192::key_size);
         m.encrypt(temp);
         ASSERT_TRUE(memcmp(temp, v.crypt, sizeof(v.plain)) == 0);
 
@@ -249,7 +249,7 @@ TEST(aes, enc_dec_256)
 
         std::copy(v.plain, v.plain + aes_utils::block_size, temp);
 
-        m.set_key(v.key, aes_flavor_aes128::key_size);
+        m.set_key(v.key, aes_flavor_aes256::key_size);
         m.encrypt(temp);
         ASSERT_TRUE(memcmp(temp, v.crypt, sizeof(v.plain)) == 0);
 
