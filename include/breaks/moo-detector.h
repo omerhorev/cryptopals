@@ -24,9 +24,9 @@ namespace breaks
          */
         static bool is_ecb(const unsigned char cipher[], size_t length, size_t block_size)
         {
-            if(length % 16 != 0) return false;
+            if(length % block_size != 0) return false;
 
-            auto blocks_count = length / 16;
+            auto blocks_count = length / block_size;
 
             // First, lets search for blocks that are equal.
             for (auto i = 0; i < blocks_count; ++i)
@@ -35,8 +35,8 @@ namespace breaks
                 {
                     if (i == j) continue;
 
-                    auto a = i * 16;
-                    auto b = j * 16;
+                    auto a = i * block_size;
+                    auto b = j * block_size;
 
                     if (memcmp(cipher + a, cipher + b, block_size) == 0)
                     {
