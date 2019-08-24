@@ -65,6 +65,25 @@ namespace utils
         {
             return xor_buffers(data1, N, data2, N, result, N);
         }
+
+        template<typename T>
+        static void shift_left(T buffer[], size_t length, size_t count, const T fill)
+        {
+            if (count > length)
+            {
+                count = length;
+            }
+
+            for (int i = 0; i < length - count; ++i)
+            {
+                buffer[i] = buffer[i + count];
+            }
+
+            for (int j = 0; j < count; ++j)
+            {
+                buffer[length - count + j] = 0;
+            }
+        }
     };
 }
 

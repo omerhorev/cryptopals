@@ -30,14 +30,14 @@ namespace model
                 {
                     if (block_size > 0xff)
                     {
-                        return 0x100;
+                        return 0;
                     }
 
                     size_t bytes_to_add = block_size - (data_length % block_size);
 
                     if (buffer_length < data_length + bytes_to_add)
                     {
-                        return 0x100;
+                        return 0;
                     }
 
                     for (auto i = 0; i < bytes_to_add; ++i)
