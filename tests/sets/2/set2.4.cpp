@@ -12,9 +12,12 @@
 // The fixture for testing class Foo.
 class sets : public ::testing::Test
 {
-public:
+private:
     unsigned char _random_key[16] = {0};
     const char *_hidden_message_base64 = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
+    unsigned char _hidden_message[138 + 1];
+
+public:
 
     void SetUp() override
     {
@@ -24,6 +27,15 @@ public:
         std::generate_n(_random_key, sizeof(_random_key), [&]() {
             return byte_dist(rd);
         });
+
+        auto hidden_message_length = utils::base64::decode(_hidden_message_base64,
+                                                           strlen(_hidden_message_base64),
+                                                           _hidden_message,
+                                                           sizeof(_hidden_message));
+
+        ASSERT_EQ(hidden_message_length, sizeof(_hidden_message) - 1);
+
+        _hidden_message[hidden_message_length] = 0;
     }
 
     void TearDown() override
@@ -69,6 +81,11 @@ public:
 
         return encoded_length;
     }
+
+    const char *get_hidden_message()
+    {
+        return (const char *) _hidden_message;
+    }
 };
 
 
@@ -82,8 +99,11 @@ TEST_F(sets, set_2_4)
         return ecryption_oracle(data, data_length, buffer, buffer_length);
     });
 
-    char hidden_message[256];
-    b.run(hidden_message, sizeof(hidden_message));
+    char extracted_hidden_message[256] = {0};
+    size_t extracted_hidden_message_length = b.run((unsigned char *) extracted_hidden_message,
+                                                   sizeof(extracted_hidden_message));
 
+    extracted_hidden_message[extracted_hidden_message_length] = 0;
 
+    ASSERT_STREQ(extracted_hidden_message, get_hidden_message());
 }
