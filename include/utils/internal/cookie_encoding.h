@@ -7,6 +7,7 @@
 
 #include <string>
 #include <sstream>
+#include <regex>
 
 namespace utils
 {
@@ -36,7 +37,7 @@ namespace utils
                     ss << "&";
                 }
 
-                ss << name << "=" << "\"" << val << "\"";
+                ss << name << "=" << val;
 
                 _first_print = false;
 
@@ -54,14 +55,23 @@ namespace utils
             template<typename T>
             void decode_field(const std::string &encoded, const std::string &name, T &value)
             {
-                auto pos = encoded.find(name + "=\"");
+                auto pos = encoded.find(name + "=");
 
-                pos += (name + "=\"").length();
-                auto length = encoded.find('\"', pos) - pos;
+                pos += (name + "=").length();
 
-                auto content = encoded.substr(pos, length);
+                auto end_pos = encoded.find('&', pos);
 
-                devalue(value, content);
+                if (pos == std::string::npos)
+                {
+                    auto content = encoded.substr(pos);
+                    devalue(value, content);
+                }
+                else
+                {
+                    auto length = end_pos - pos;
+                    auto content = encoded.substr(pos, length);
+                    devalue(value, content);
+                }
             }
 
             /**
@@ -95,7 +105,11 @@ namespace utils
                     return;
                 }
 
-                std::copy(content.cbegin(), content.cend(), value);
+                std::string temp = content;
+
+                temp = regex_replace(temp, std::regex("\\&"), "\\&");
+
+                std::copy(temp.cbegin(), temp.cend(), value);
                 value[content.length()] = 0;
             }
 
