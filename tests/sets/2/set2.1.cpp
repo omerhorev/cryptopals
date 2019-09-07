@@ -6,7 +6,7 @@
 #include <model/padding.h>
 #include "model/internal/padding/pkcs7.h"
 
-TEST(sets, set_2_1)
+TEST(set_2_1, run)
 {
     const size_t block_size = 20;
     const size_t data_length = 16;

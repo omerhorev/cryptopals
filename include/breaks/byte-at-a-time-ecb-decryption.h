@@ -5,14 +5,8 @@
 #ifndef CRYPTOPALS_BYTE_AT_A_TIME_ECB_DECRYPTION_H
 #define CRYPTOPALS_BYTE_AT_A_TIME_ECB_DECRYPTION_H
 
-#include <iomanip>
-#include <iostream>
 #include <cstddef>
 #include <functional>
-#include <algorithm>
-#include <climits>
-#include "utils/general.h"
-#include "moo-detector.h"
 
 namespace breaks
 {
@@ -25,106 +19,75 @@ namespace breaks
                 : _encryption_oracle(std::move(encryption_oracle))
         {}
 
-        size_t run(unsigned char hidden_message_output[], size_t hidden_message_output_max_size)
+        size_t run(unsigned char hidden_message_output[], size_t hidden_message_output_max_size);
+
+    private:
+
+        /**
+         * Because the encrypted data can consist of a random amount of bytes at the start, and assuming it is
+         * distributed evenly, in average every 16 encryptions it we generated an exact block sized random data.
+         * In that can, we can just erase that block and we will receive a data encrypted as it has no random data
+         * at the start.
+         *
+         * The way we discover if the data added before the message was rounded to 'block size' is adding blocks
+         * of known data (for example 'aaaaa...'), the amount of blocks must be at least as the hidden message itself
+         * so we wont mix them up. if we discover that all the additional blocks are identical in the encrypted data
+         * that means the random data was a multiplicand of the block size
+         *
+         * @param message         The message to encrypt
+         * @param message_length  The length of the message to encrypt
+         * @param buffer          (output) The buffer to encrypt into
+         * @param buffer_length   The length of the output buffer
+         * @param block_size      Default value is the class's member '_block_size'
+         * @param max_ties        This method will encrypt multiple times, so we need to max it up
+         * @return
+         */
+        size_t encrypt_advanced(const unsigned char *message,
+                                size_t message_length,
+                                unsigned char *buffer,
+                                size_t buffer_length,
+                                size_t block_size,
+                                size_t max_tries);
+
+        /**
+         * Encrypts some data while canceling the random data before the 'data' and leaving only the hidden message
+         * after the data.
+         *
+         * see the documentation of encrypt_advanced
+         *
+         * @note Must be used after the block_size was set.
+         *
+         * @param data        The data to encrypt
+         * @param data_length The length of the data to encrypt
+         * @param buffer      The output buffer to put the data into
+         * @param buffer_size The length of the output buffer
+         * @return            The size of the encrypted data
+         */
+        size_t encrypt(const unsigned char data[], size_t data_length, unsigned char buffer[], size_t buffer_size);
+
+        /**
+         * Used a sequence of encryptions to detect the block size
+         */
+        void detect_block_size();
+
+        /**
+         * After detecting the block size, detect the number of blocks the hidden message is
+         */
+        size_t detect_hidden_block_count()
         {
-            // First, lets detect the block size
-            size_t block_size = detect_block_size();
-            size_t hidden_message_length = 0;
-            size_t write_index = 0;
+            if (_block_size == 0)
+            { throw std::runtime_error("Must be used after the block_size was detected"); }
 
-            if (block_size == 0)
-            { return 0; }
-
-            size_t hidden_message_block_count = detect_hidden_block_count(block_size);
-            size_t calculated_hidden_message_max_length = hidden_message_block_count * block_size;
-
-            unsigned char plain[max_hidden_messge_length * 2];
-            unsigned char cipher[max_encrypted_data_length];
-
-            std::generate_n(plain, sizeof(plain), []() { return 15; });
-
-            for (size_t i = 0; i < calculated_hidden_message_max_length; i++)
-            {
-                size_t plain_length = calculated_hidden_message_max_length * 2 - i - 1;
-                size_t unknown_char_index = calculated_hidden_message_max_length - 1;
-
-                utils::general::shift_left(plain, calculated_hidden_message_max_length, 1, (unsigned char) 0x00);
-
-                bool found = false;
-
-                for (int j = 0; j <= UCHAR_MAX; ++j)
-                {
-                    auto c = (unsigned char) j;
-
-                    plain[unknown_char_index] = c;
-
-                    _encryption_oracle(plain, plain_length, cipher, sizeof(cipher));
-
-                    if (std::equal(cipher + calculated_hidden_message_max_length * 0,
-                                   cipher + calculated_hidden_message_max_length * 1,
-                                   cipher + calculated_hidden_message_max_length * 1,
-                                   cipher + calculated_hidden_message_max_length * 2))
-                    {
-                        found = true;
-
-                        // Write into the buffer if we can!
-                        if (write_index < hidden_message_output_max_size) hidden_message_output[write_index++] = c;
-
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    // We did'nt found any data, that means we ended up in a data that isn't consistent through two
-                    // different runs. That can be:
-                    //  1) Random data (Not supported)
-                    //  2) Data that is depended on the data provided (Not supported, needs to be modulated)
-                    //  3) The PKCS7 padding (This is the case in this break!)
-                    //
-                    // If its indeed the PKCS7 padding we will be able to found the \01 padding at the end but not the
-                    // \02 (because once we decrease the input length the \01 will because \02.
-                    // Meaning, the weite_index, which represents the length includes the \01. Lets decrease it by 1
-                    // so we will get a correct length!
-                    write_index--;
-                    break;
-                }
-            }
-
-            return write_index;
-        }
-
-        size_t detect_block_size()
-        {
-            const size_t min_block_size = 1;
-            const size_t max_block_size = 64;
-
-            unsigned char data[max_block_size * 2] = {0};
-
-            for (size_t block_size = min_block_size; block_size < max_block_size; block_size++)
-            {
-                unsigned char buffer[max_encrypted_data_length];
-
-                auto length = _encryption_oracle(data, block_size * 2, buffer, max_encrypted_data_length);
-
-                if (breaks::moo_detector::is_ecb(buffer, block_size * 2, block_size))
-                {
-                    return block_size;
-                }
-            }
-
-            return 0;
-        }
-
-        size_t detect_hidden_block_count(size_t block_size)
-        {
             unsigned char buffer[1] = {0};
             unsigned char output[max_encrypted_data_length] = {0};
 
-            return _encryption_oracle(buffer, 0, output, sizeof(output)) / block_size;
+            auto l = encrypt(buffer, 0, output, sizeof(output));
+
+            return l / _block_size;
         }
 
     private:
+        size_t _block_size;
         encryption_function_t _encryption_oracle;
 
     private:

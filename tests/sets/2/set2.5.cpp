@@ -87,7 +87,7 @@ size_t encryption_oracle(const unsigned char plain[],
 }
 
 
-TEST(sets, set_2_5)
+TEST(set_2_5, run)
 {
     const size_t max_cipher_length = 256;
 

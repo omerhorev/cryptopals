@@ -133,7 +133,7 @@ float break_cyclic_xor_encryption_by_key_length(const unsigned char cipher[], si
     return (sum_score / number_of_split_buffers);
 }
 
-TEST(sets, set_1_6)
+TEST(set_1_6, run)
 {
     const size_t compare_blocks_count = 4;
     const size_t max_key_size_possible = 40;

@@ -6,7 +6,7 @@
 #include <model/block.h>
 #include <utils/files.h>
 
-TEST(sets, set_2_2)
+TEST(set_2_2, run)
 {
     auto key = (unsigned char *) "YELLOW SUBMARINE";
     const unsigned char iv[16] = {0};

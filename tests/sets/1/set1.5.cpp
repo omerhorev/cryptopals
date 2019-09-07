@@ -10,7 +10,7 @@ using namespace model;
 
 using namespace utils;
 
-TEST(sets, set_1_5)
+TEST(set_1_5, run)
 {
     const char *plain = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
 

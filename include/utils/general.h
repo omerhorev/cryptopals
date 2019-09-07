@@ -84,6 +84,20 @@ namespace utils
                 buffer[length - count + j] = 0;
             }
         }
+
+        /**
+         * Rounds a number to a specific multiple.
+         *
+         * @tparam T   The type of the numbers
+         * @param num  The number to round
+         * @param mult The multiple to round to
+         * @return (T) The rounded number
+         */
+        template<typename T>
+        static T round(T num, T mult)
+        {
+            return ((num + mult - 1) / mult) * mult;
+        }
     };
 }
 
