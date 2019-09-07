@@ -1,5 +1,5 @@
 //
-// Created by omerh on 20/08/2019.
+// Created by omerh on 26/08/2019.
 //
 
 #include <gtest/gtest.h>
@@ -10,12 +10,13 @@
 #include <breaks/byte-at-a-time-ecb-decryption.h>
 
 // The fixture for testing class Foo.
-class set_2_4 : public ::testing::Test
+class set_2_6 : public ::testing::Test
 {
 private:
     unsigned char _random_key[16] = {0};
     const char *_hidden_message_base64 = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
     unsigned char _hidden_message[138 + 1];
+    std::random_device rd;
 
 public:
 
@@ -47,39 +48,44 @@ public:
                              unsigned char *buffer,
                              size_t buffer_length)
     {
+        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
+        std::uniform_int_distribution<size_t> length_dist(0, 32);
+        std::size_t random_noise_length = length_dist(rd);
+
         model::aes128_ecb model;
         model.initialize(_random_key, sizeof(_random_key));
 
-        if (buffer_length < message_length)
+        if (buffer_length < message_length + random_noise_length)
         {
             return 0;
         }
 
-        std::copy_n(message, message_length, buffer);
+        std::generate_n(buffer, random_noise_length, [&]() { return byte_dist(rd); });
+        std::copy_n(message, message_length, buffer + random_noise_length);
 
         auto hidden_message_length = utils::base64::decode(_hidden_message_base64,
                                                            strlen(_hidden_message_base64),
-                                                           buffer + message_length,
-                                                           buffer_length - message_length);
+                                                           buffer + message_length + random_noise_length,
+                                                           buffer_length - message_length - random_noise_length);
 
         if (hidden_message_length == 0)
         {
             return 0;
         }
 
-        auto encoded_length = model::padding::pkcs7::encode(buffer,
-                                                            buffer_length,
-                                                            message_length + hidden_message_length,
-                                                            model::aes128_ecb::block_size);
+        auto enc_length = model::padding::pkcs7::encode(buffer,
+                                                        buffer_length,
+                                                        message_length + hidden_message_length + random_noise_length,
+                                                        model::aes128_ecb::block_size);
 
-        if (encoded_length == 0)
+        if (enc_length == 0)
         {
             return 0;
         }
 
-        model.encrypt(buffer, encoded_length);
+        model.encrypt(buffer, enc_length);
 
-        return encoded_length;
+        return enc_length;
     }
 
     const char *get_hidden_message()
@@ -89,7 +95,7 @@ public:
 };
 
 
-TEST_F(set_2_4, run)
+TEST_F(set_2_6, run)
 {
 
     breaks::byte_in_a_time_ecb_decryption b([&](const unsigned char *data,

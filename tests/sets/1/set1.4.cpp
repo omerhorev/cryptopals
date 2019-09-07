@@ -11,7 +11,7 @@
 
 using namespace utils;
 
-TEST(sets, set_1_4)
+TEST(set_1_4, run)
 {
     char key = 0;
     float max_accuracy = 0;

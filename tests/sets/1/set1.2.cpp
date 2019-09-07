@@ -9,7 +9,7 @@
 
 using namespace utils;
 
-TEST(sets, set_1_2)
+TEST(set_1_2, run)
 {
     unsigned char data1[18];
     unsigned char data2[18];

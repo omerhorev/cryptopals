@@ -47,6 +47,9 @@ namespace utils
 
         print_buffer(data);
     }
+
+    void print_blocked_buffer(const unsigned char data[], size_t length, size_t block_size);
+    void print_blocked_buffer(const char* name, const unsigned char data[], size_t length, size_t block_size);
 }
 
 #endif //CRYPTOPALS_DEBUG_H

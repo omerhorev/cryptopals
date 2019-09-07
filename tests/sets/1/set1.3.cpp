@@ -10,7 +10,7 @@
 
 using namespace utils;
 
-TEST(sets, set_1_3)
+TEST(set_1_3, run)
 {
     unsigned char data1[34];
     unsigned char key = 0;

@@ -8,7 +8,7 @@
 
 using namespace utils;
 
-TEST(sets, set_1_1)
+TEST(set_1_1, run)
 {
     char test_vector_hex[] = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
     char test_vector_base64[] = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";

@@ -76,7 +76,7 @@ size_t encryption_oracle(unsigned char input[],
     return padded_length;
 }
 
-TEST(sets, set_2_3)
+TEST(set_2_3, run)
 {
     const size_t block_size = model::aes128_cbc::block_size;
 

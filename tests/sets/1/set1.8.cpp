@@ -8,7 +8,7 @@
 #include "breaks/moo-detector.h"
 using namespace utils;
 
-TEST(sets, set_1_8)
+TEST(set_1_8, run)
 {
     unsigned char data[204][160];
 
