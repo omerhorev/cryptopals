@@ -37,7 +37,7 @@ namespace model
              * @param data          The buffer of the data.
              * @param length        The length of the buffer
              * * @param block_size    The size of the block to pad accordingly.
-             * @return (size_t) The number of pad bytes added, 256 if error
+             * @return (size_t) The size of the decoded buffer
              */
             static size_t decode(const unsigned char data[], size_t buffer_length, size_t block_size)
             {
