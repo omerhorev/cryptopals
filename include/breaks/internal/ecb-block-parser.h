@@ -7,7 +7,7 @@
 
 #include <cstddef>
 #include <algorithm>
-#include <exception>
+#include <stdexcept>
 
 namespace breaks
 {
