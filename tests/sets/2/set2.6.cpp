@@ -43,9 +43,7 @@ public:
                              unsigned char *buffer,
                              size_t buffer_length)
     {
-        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
-        std::uniform_int_distribution<size_t> length_dist(0, 32);
-        std::size_t random_noise_length = length_dist(rd);
+        auto random_noise_length = utils::random::instance().get<size_t>(0, 32);
 
         model::aes128_ecb model;
         model.initialize(_random_key, sizeof(_random_key));
@@ -55,7 +53,7 @@ public:
             return 0;
         }
 
-        std::generate_n(buffer, random_noise_length, [&]() { return byte_dist(rd); });
+        utils::random::instance().fill(buffer, random_noise_length);
         std::copy_n(message, message_length, buffer + random_noise_length);
 
         auto hidden_message_length = utils::base64::decode(_hidden_message_base64,

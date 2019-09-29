@@ -18,6 +18,14 @@ namespace model
             class pkcs7
             {
             public:
+                struct invalid_padding : public std::exception
+                {
+                    const char *what() const noexcept override
+                    {
+                        return "invalid padding";
+                    }
+                };
+
                 /**
                  * Adds padding according to PKCS#7 encoding.
                  *
@@ -65,7 +73,7 @@ namespace model
                     {
                         if (data[buffer_length - i - 1] != expected_pad_byte)
                         {
-                            throw std::runtime_error("Invalid padding");
+                            throw invalid_padding();
                         }
                     }
 
