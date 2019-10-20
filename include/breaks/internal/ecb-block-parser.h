@@ -151,6 +151,9 @@ namespace breaks
             block operator[](size_t index)
             { return get(index); }
 
+            size_t blocks_count()
+            { return end() - begin(); }
+
         private:
             unsigned char *_cipher;
             size_t _blocks_count;
