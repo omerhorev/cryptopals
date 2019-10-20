@@ -42,6 +42,11 @@ namespace model
 
                     size_t bytes_to_add = block_size - (data_length % block_size);
 
+                    if (bytes_to_add == 0)
+                    {
+                        bytes_to_add = block_size;
+                    }
+
                     if (buffer_length < data_length + bytes_to_add)
                     { throw std::invalid_argument("the buffer size is too little, no room for padding"); }
 
@@ -68,6 +73,11 @@ namespace model
 
                     auto expected_pad_length = size_t(data[buffer_length - 1]);
                     auto expected_pad_byte = (unsigned char) expected_pad_length;
+
+                    if (expected_pad_length == 0)
+                    {
+                        throw invalid_padding();
+                    }
 
                     for (size_t i = 0; i < expected_pad_length; i++)
                     {
