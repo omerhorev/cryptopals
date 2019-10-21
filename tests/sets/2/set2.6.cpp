@@ -8,6 +8,7 @@
 #include <utils/base64.h>
 #include <model/padding.h>
 #include <breaks/byte-at-a-time-ecb-decryption.h>
+#include <utils/random.h>
 
 // The fixture for testing class Foo.
 class set_2_6 : public ::testing::Test
@@ -15,19 +16,13 @@ class set_2_6 : public ::testing::Test
 private:
     unsigned char _random_key[16] = {0};
     const char *_hidden_message_base64 = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
-    unsigned char _hidden_message[138 + 1];
-    std::random_device rd;
+    unsigned char _hidden_message[138 + 1];;
 
 public:
 
     void SetUp() override
     {
-        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
-        std::random_device rd;
-
-        std::generate_n(_random_key, sizeof(_random_key), [&]() {
-            return byte_dist(rd);
-        });
+        utils::random::instance().fill(_random_key);
 
         auto hidden_message_length = utils::base64::decode(_hidden_message_base64,
                                                            strlen(_hidden_message_base64),
@@ -48,9 +43,7 @@ public:
                              unsigned char *buffer,
                              size_t buffer_length)
     {
-        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
-        std::uniform_int_distribution<size_t> length_dist(0, 32);
-        std::size_t random_noise_length = length_dist(rd);
+        auto random_noise_length = utils::random::instance().get<size_t>(0, 32);
 
         model::aes128_ecb model;
         model.initialize(_random_key, sizeof(_random_key));
@@ -60,7 +53,7 @@ public:
             return 0;
         }
 
-        std::generate_n(buffer, random_noise_length, [&]() { return byte_dist(rd); });
+        utils::random::instance().fill(buffer, random_noise_length);
         std::copy_n(message, message_length, buffer + random_noise_length);
 
         auto hidden_message_length = utils::base64::decode(_hidden_message_base64,

@@ -18,6 +18,24 @@ namespace model
             class pkcs7
             {
             public:
+                struct invalid_padding : public std::exception
+                {
+                    invalid_padding() : pad_index_error(-1), invalid_pad_byte(0xff)
+                    {}
+
+                    explicit invalid_padding(int pad_index_error, unsigned char invalid_pad_byte) :
+                            pad_index_error(pad_index_error), invalid_pad_byte(invalid_pad_byte)
+                    {}
+
+                    const char *what() const noexcept override
+                    {
+                        return "invalid padding";
+                    }
+
+                    const int pad_index_error;
+                    const unsigned char invalid_pad_byte;
+                };
+
                 /**
                  * Adds padding according to PKCS#7 encoding.
                  *
@@ -33,6 +51,11 @@ namespace model
                     { throw std::invalid_argument("cannot pad a block over 256"); }
 
                     size_t bytes_to_add = block_size - (data_length % block_size);
+
+                    if (bytes_to_add == 0)
+                    {
+                        bytes_to_add = block_size;
+                    }
 
                     if (buffer_length < data_length + bytes_to_add)
                     { throw std::invalid_argument("the buffer size is too little, no room for padding"); }
@@ -61,11 +84,16 @@ namespace model
                     auto expected_pad_length = size_t(data[buffer_length - 1]);
                     auto expected_pad_byte = (unsigned char) expected_pad_length;
 
+                    if (expected_pad_length == 0)
+                    {
+                        throw invalid_padding();
+                    }
+
                     for (size_t i = 0; i < expected_pad_length; i++)
                     {
                         if (data[buffer_length - i - 1] != expected_pad_byte)
                         {
-                            throw std::runtime_error("Invalid padding");
+                            throw invalid_padding(i, data[buffer_length - i - 1]);
                         }
                     }
 

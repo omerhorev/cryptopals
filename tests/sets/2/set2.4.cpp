@@ -8,6 +8,7 @@
 #include <utils/base64.h>
 #include <model/padding.h>
 #include <breaks/byte-at-a-time-ecb-decryption.h>
+#include <utils/random.h>
 
 // The fixture for testing class Foo.
 class set_2_4 : public ::testing::Test
@@ -21,12 +22,7 @@ public:
 
     void SetUp() override
     {
-        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
-        std::random_device rd;
-
-        std::generate_n(_random_key, sizeof(_random_key), [&]() {
-            return byte_dist(rd);
-        });
+        utils::random::instance().fill(_random_key);
 
         auto hidden_message_length = utils::base64::decode(_hidden_message_base64,
                                                            strlen(_hidden_message_base64),

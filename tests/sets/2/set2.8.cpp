@@ -5,6 +5,7 @@
 #include <utils/base64.h>
 #include <breaks/byte-at-a-time-ecb-decryption.h>
 #include <breaks/bitflipping.h>
+#include <utils/random.h>
 
 // The fixture for testing class Foo.
 class set_2_8 : public ::testing::Test
@@ -12,22 +13,13 @@ class set_2_8 : public ::testing::Test
 private:
     unsigned char _random_key[16] = {0};
     unsigned char _random_iv[16] = {0};
-    std::random_device rd;
 
 public:
 
     void SetUp() override
     {
-        std::uniform_int_distribution<unsigned char> byte_dist(0, 0xff);
-        std::random_device rd;
-
-        std::generate_n(_random_key, sizeof(_random_key), [&]() {
-            return byte_dist(rd);
-        });
-
-        std::generate_n(_random_iv, sizeof(_random_iv), [&]() {
-            return byte_dist(rd);
-        });
+        utils::random::instance().fill(_random_key);
+        utils::random::instance().fill(_random_iv);
     }
 
     void TearDown() override
