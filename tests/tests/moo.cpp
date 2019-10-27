@@ -7,7 +7,9 @@
 #include <model/xor-byte-key.h>
 #include "utils/general.h"
 #include "model/block.h"
+#include "model/stream.h"
 #include <model/internal/moo/cbc.h>
+#include <model/internal/moo/ctr.h>
 #include "model/internal/moo/ecb.h"
 #include "model/internal/aes/aes-utils.h"
 #include "model/internal/aes/aes-falvor.h"
@@ -127,4 +129,15 @@ TEST(moo, cbc_aes128)
 
     ASSERT_TRUE(memcmp(test_vector.plain, test_vector.crypt, sizeof(test_vector.crypt)) == 0);
 
+}
+
+TEST(moo, ctr)
+{
+
+    aes128_ctr ctr;
+    ctr.initialize_encryption((const unsigned char*)"", 1, 0, 0);
+
+    unsigned char data[32] = {0};
+
+    ctr.encrypt(data, sizeof(data));
 }
