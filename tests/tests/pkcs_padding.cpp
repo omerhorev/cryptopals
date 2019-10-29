@@ -35,7 +35,7 @@ TEST(pkcs7_padding, encode_decode)
             ASSERT_THROW({
                              buffer[encoded_length - 1] = block_size + 1; // Fuck the buffer
                              actual_size = padding::pkcs7::decode(buffer, encoded_length, block_size);
-                         }, model::internal::padding::pkcs7::invalid_padding);
+                         }, model::pkcs7_invalid_padding);
 
         }
     }

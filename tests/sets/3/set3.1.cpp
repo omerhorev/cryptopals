@@ -73,7 +73,7 @@ public:
         {
             decrypt(cipher, length, temp, length);
         }
-        catch (model::internal::padding::pkcs7::invalid_padding &e)
+        catch (model::pkcs7_invalid_padding &e)
         {
             // Lets make sure we didn't ruin anything else...
             // The reason it only works with padding length greater than one is that when the padding is 1 the

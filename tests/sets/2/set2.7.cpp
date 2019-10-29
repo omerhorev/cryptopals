@@ -17,6 +17,6 @@ TEST(set_2_7, run)
         const auto block_size = 16;
 
         ASSERT_THROW(model::padding::pkcs7::decode(data, block_size, block_size),
-                     model::internal::padding::pkcs7::invalid_padding);
+                     model::pkcs7_invalid_padding);
     }
 }
