@@ -6,6 +6,8 @@
 #define CRYPTOPALS_AES_H
 
 #include <cstddef>
+#include <sstream>
+#include <model/exceptions.h>
 #include "aes-round-keys.h"
 #include "aes-utils.h"
 
@@ -36,7 +38,7 @@ namespace model
                 {
                     if (length != key_size)
                     {
-                        return;
+                        throw invalid_key(key, length);
                     }
 
                     aes_utils::generate_round_keys(key, _round_keys);
