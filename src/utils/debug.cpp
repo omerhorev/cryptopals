@@ -9,9 +9,9 @@ void utils::print_buffer(const unsigned char *data, size_t length)
 {
     char *string = new char[length * 2 + 1];
 
-    string[length * 2] = 0;
-
     hex::encode(data, length, string, length * 2);
+
+    string[length * 2] = 0;
 
     std::cout << string << " (" << length << "b)" << std::endl;
 
