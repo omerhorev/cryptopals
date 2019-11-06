@@ -24,8 +24,13 @@ namespace utils
          */
         static float score_by_frequency(const char string[], size_t length);
 
-    private:
+        /**
+         * Returns the expected frequency of a specific letter in a general english text. Used for scoring strings
+         * @param c The char to check
+         * @return Its frequency.
+         */
         static float get_letter_english_frequency(char c);
+    private:
         static const size_t number_of_chars_in_english = 26;
     };
 }
