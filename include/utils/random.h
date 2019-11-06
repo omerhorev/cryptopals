@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <random>
 #include <algorithm>
+#include <array>
 
 namespace utils
 {
@@ -59,6 +60,14 @@ namespace utils
             std::generate_n(arr, length, [&]() {
                 return _(_rd);
             });
+        }
+
+        template <size_t N>
+        std::array<unsigned char, N> buffer()
+        {
+            std::array<unsigned char, N> _;
+            fill(_.data(), N);
+            return _;
         }
 
     private:
