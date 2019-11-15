@@ -89,7 +89,7 @@ TEST_F(set_3_8, part1)
         {
             auto g = _.generate();
 
-            if (cipher[i] != (unsigned char)(g ^ plain[i]))
+            if (cipher[i] != (unsigned char) (g ^ plain[i]))
             {
                 found = false;
                 break;
@@ -107,5 +107,20 @@ TEST_F(set_3_8, part1)
 
 TEST_F(set_3_8, part2)
 {
+    auto token = generate_token();
 
+    auto timestamp = uint32_t(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+
+    bool found = false;
+    
+    for (int i = 0; i < 10000; ++i)
+    {
+        if (generate_token_by_unix_timestamp(timestamp--) == token)
+        {
+            found = true;
+        }
+    }
+
+    ASSERT_TRUE(found);
 }
