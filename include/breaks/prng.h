@@ -21,11 +21,7 @@ namespace breaks
          */
         static uint32_t get_seed_from_first_element(uint32_t element)
         {
-            // First, lets untamper the value...
-
-            untamper(element);
-
-            return 0;
+            return untamper(element);
         }
 
         static uint32_t untamper(uint32_t value)
@@ -48,15 +44,28 @@ namespace breaks
              *     l = 18
              */
 
-            uint32_t test = 12121212;
-            test ^= ((test >> 15) & 0x76543210);
+            unsigned const U = 11, D = 0xffffffff;
+            unsigned const S = 7, B = 0x9d2c5680;
+            unsigned const T = 15, C = 0xefc60000;
+            unsigned const L = 18;
 
-            value = reverse_shift_right_xor_and(test, 15, 0x76543210);
-
+            value = reverse_shift_right_xor_and(value, L, 0xffffffff);
+            value = reverse_shift_left_xor_and(value, T, C);
+            value = reverse_shift_left_xor_and(value, S, B);
+            value = reverse_shift_right_xor_and(value, U, D);
 
             return value;
         }
 
+        /**
+         * Given the expression 'value = (number << offset) & mask', retrieves 'number' from a known
+         * value, offset and mask.
+         *
+         * @param value  The 'value' in the expression described.
+         * @param offset The 'offset' in the expression described
+         * @param mask   The 'mask' in the expression described
+         * @return (uint32_t) The 'number' in the expression described
+         */
         static uint32_t reverse_shift_left_xor_and(uint32_t value, uint32_t offset, uint32_t mask)
         {
             /**
@@ -120,6 +129,15 @@ namespace breaks
             return X;
         }
 
+        /**
+         * Given the expression 'value = (number >> offset) & mask', retrieves 'number' from a known
+         * value, offset and mask.
+         *
+         * @param value  The 'value' in the expression described.
+         * @param offset The 'offset' in the expression described
+         * @param mask   The 'mask' in the expression described
+         * @return (uint32_t) The 'number' in the expression described
+         */
         static uint32_t reverse_shift_right_xor_and(uint32_t value, uint32_t offset, uint32_t mask)
         {
             /**

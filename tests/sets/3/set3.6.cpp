@@ -14,10 +14,31 @@ using namespace std::chrono;
 
 TEST(sets_3_6, run)
 {
-    auto seed = utils::random::instance().get<uint32_t>();
+    auto time = system_clock::now();
+
+    // Simulate passage of time...
+    time += milliseconds(utils::random::instance().get<uint32_t>(40, 1000));
+
+    auto seed = uint32_t(duration_cast<milliseconds>(time.time_since_epoch()).count());
     auto number = model::mt19937(seed).generate();
 
-    auto broken_number = breaks::mt19973::get_seed_from_first_element(number);
+    // Simulate passage of time...
+    time += milliseconds(utils::random::instance().get<uint32_t>(40, 1000));
 
-    ASSERT_EQ(broken_number, number);
+    // The actual attack:
+    auto timestamp = uint32_t(duration_cast<milliseconds>(time.time_since_epoch()).count());
+
+    // Lets just try some seeds until we get the right one
+    bool found = false;
+
+    for (int i = 0; i < 10000; ++i)
+    {
+        if (model::mt19937(timestamp--).generate() == number)
+        {
+            SUCCEED();
+            found = true;
+        }
+    }
+
+    if (!found) FAIL();
 }
