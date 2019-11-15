@@ -6,24 +6,56 @@
 #define CRYPTOPALS_BREAKS_PRNG_H
 
 #include <cstdint>
+#include <array>
+#include <algorithm>
 #include <utils/bits.h>
+#include <model/prng.h>
 
 namespace breaks
 {
-    class mt19973
+    class mt19937
     {
     public:
+
+        static const auto values_in_mt19937_state = 624;
+
         /**
-         * Given the first element the mt19973 engine provided, crack the original seed.
+         * Given 624 consecutive values generated, and the first one is the first in the state (the first value
+         * generated after a twist), generates a mt19937 replica that will generate the same values as the one
+         * generated the values provided.
          *
-         * @param element The first element provided by the engine
-         * @return (uint32_t) The seed used to initialize the mt19973 engine
+         * @param values 624 values array as described.
+         * @return (model::mt19937) cloned model as described.
          */
-        static uint32_t get_seed_from_first_element(uint32_t element)
+        static model::mt19937 clone_mt19937(const std::array<uint32_t, values_in_mt19937_state> &values)
         {
-            return untamper(element);
+            //
+            // This is an exact replica of the members of the mt19937 model implementation.
+            //
+            struct
+            {
+                unsigned int state_used_vector_index;
+                std::array<uint32_t, values_in_mt19937_state> state;
+            } internal_state{};
+
+            internal_state.state_used_vector_index = 0;
+
+            std::transform(values.begin(), values.end(), internal_state.state.begin(), [&](auto v) {
+                return untamper(v);
+            });
+
+            return *(model::mt19937 *) &internal_state;
         }
 
+    private:
+
+        /**
+         * The temper function in the mersenne-twister is reversible! given a value, reverse it to the internal
+         * state value.
+         *
+         * @param value The value generated from the mt19937 model.
+         * @return The internal-state value.
+         */
         static uint32_t untamper(uint32_t value)
         {
             /**
