@@ -119,6 +119,7 @@ namespace model
             typedef default_ctr_stream_cipher_base<Model, Format, Endianness> base_stream_cipher;
 
         public:
+            static const auto key_size = Model::key_size;
             typedef typename default_ctr_stream_cipher_base<Model, Format, Endianness>::counter_t counter_t;
 
         public:
