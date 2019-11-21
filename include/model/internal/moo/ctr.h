@@ -62,16 +62,16 @@ namespace model
                 {
                     if (Format == ctr_format::nonce_first)
                     {
-                        model::internal::encoder<counter_t, Endianness>::encode(nonce,
+                        model::internal::endianness_encoder<counter_t, Endianness>::encode(nonce,
                                                                                 *((unsigned char (*)[sizeof(counter_t)]) &mask[0]));
-                        model::internal::encoder<counter_t, Endianness>::encode(counter,
+                        model::internal::endianness_encoder<counter_t, Endianness>::encode(counter,
                                                                                 *((unsigned char (*)[sizeof(counter_t)]) &mask[8]));
                     }
                     else if (Format == ctr_format::counter_first)
                     {
-                        model::internal::encoder<counter_t, Endianness>::encode(counter,
+                        model::internal::endianness_encoder<counter_t, Endianness>::encode(counter,
                                                                                 *((unsigned char (*)[sizeof(counter_t)]) &mask[0]));
-                        model::internal::encoder<counter_t, Endianness>::encode(nonce,
+                        model::internal::endianness_encoder<counter_t, Endianness>::encode(nonce,
                                                                                 *((unsigned char (*)[sizeof(counter_t)]) &mask[8]));
                     }
 

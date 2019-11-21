@@ -7,6 +7,8 @@
 
 #include <cstddef>
 #include <array>
+#include <type_traits>
+#include <limits>
 
 namespace model
 {
@@ -19,13 +21,13 @@ namespace model
         };
 
         template<typename T, model::internal::endianness Endianness>
-        struct encoder
+        struct endianness_encoder
         {
             static void encode(T t, unsigned char (&buffer)[sizeof(T)]);
         };
 
         template<typename T>
-        struct encoder<T, endianness::little>
+        struct endianness_encoder<T, endianness::little>
         {
             static_assert(std::is_integral<T>::value, "T must be an integral type");
 
@@ -48,7 +50,7 @@ namespace model
         };
 
         template<typename T>
-        struct encoder<T, endianness::big>
+        struct endianness_encoder<T, endianness::big>
         {
             static_assert(std::is_integral<T>::value, "T must be an integral type");
 
@@ -68,10 +70,31 @@ namespace model
                 {
                     auto first_byte = t & 0xff;
                     *i = static_cast<unsigned char>(first_byte);
-                    t >>= 8;
+                    t >>= CHAR_BIT;
                 }
             }
+
+            static T decode(unsigned char (&buffer)[sizeof(T)])
+            {
+                T val = 0;
+
+                for (auto i = 0; i < sizeof(T); i++)
+                {
+                    val <<= CHAR_BIT;
+                    val |= buffer[i];
+                }
+
+                return val;
+            }
         };
+
+        template<class T>
+        static T circular_left_shift(T value, unsigned int offset)
+        {
+            const size_t size_in_bits = sizeof(T) * CHAR_BIT;
+
+            return (value << offset) | (value >> (size_in_bits - offset));
+        }
     }
 }
 
