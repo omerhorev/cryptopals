@@ -24,7 +24,7 @@ namespace model
         const char *what() const noexcept override
         {
             std::ostringstream _("");
-            _ << "invalid key provided (key:" << (void*)_key << ", length: " << _length << ")";
+            _ << "invalid key provided (key:" << (void *) _key << ", length: " << _length << ")";
             return _.str().c_str();
         }
 
@@ -57,6 +57,19 @@ namespace model
 
         const int pad_index_error;
         const unsigned char invalid_pad_byte;
+    };
+
+    struct internal_error : public std::exception
+    {
+        explicit internal_error(const std::string &message) : message(message)
+        {}
+
+        const char *what() const noexcept override
+        {
+            return message.c_str();
+        }
+
+        const std::string message;
     };
 
 }
