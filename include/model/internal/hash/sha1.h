@@ -19,6 +19,7 @@ namespace model
         class sha1
         {
         public:
+            static const size_t hash_size = 20;
 
             /**
              * Initializes the sha1 object
@@ -148,7 +149,7 @@ namespace model
 
             void encode_hash(const unsigned char o_hash[], size_t length) const
             {
-                if (length < 20)
+                if (length < hash_size)
                 {
                     throw std::length_error("Not enough space in the hash vector provided");
                 }
