@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <model/internal/hash/sha1.h>
+#include <model/hash.h>
 
 struct test_vectors
 {
@@ -22,7 +23,7 @@ TEST(hash, sha1)
 {
 
     const test_vectors test_vectors[] = {
-            /*{
+            {
                     {
 
                             {
@@ -33,7 +34,7 @@ TEST(hash, sha1)
                     },
                     1,
                     {159, 33,  215, 76,  122, 226, 27,  228, 83,  155, 165, 140, 22,  81,  11,  43,  63,  33,  16,  93}
-            },*/
+            },
             {
                     {
 
@@ -200,7 +201,7 @@ TEST(hash, sha1)
             }
     };
 
-    model::internal::sha1<uint32_t, uint64_t, 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0> a;
+    model::sha1 a;
 
     for (const auto &test_vector : test_vectors)
     {

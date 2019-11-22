@@ -20,9 +20,18 @@ namespace model
         {
         public:
 
+            /**
+             * Initializes the sha1 object
+             */
             sha1() : _h0(H0), _h1(H1), _h2(H2), _h3(H3), _h4(H4), _buffer_index(0), _buffer(), _message_length(0)
             {}
 
+            /**
+             * Updates the state with more data
+             *
+             * @param data   The data to enter to the hash calculation
+             * @param length The length of the data
+             */
             void update(const unsigned char data[], size_t length)
             {
                 for (auto i = 0; i < length; ++i)
@@ -37,6 +46,11 @@ namespace model
                 _message_length += length;
             }
 
+            /**
+             * Digest all the updated data into a hash 160 bit hash
+             * @param o_hash The buffer to put the hash into.
+             * @param length The length of the buffer, must be at least 20 bytes
+             */
             void digest(unsigned char o_hash[], size_t length)
             {
                 pad_and_update();
