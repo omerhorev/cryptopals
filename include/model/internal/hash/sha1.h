@@ -113,6 +113,8 @@ namespace model
                     throw model::internal_error("Cannot update state (the buffer is not full)");
                 }
 
+                utils::print_blocked_buffer(_buffer, sizeof(_buffer), 8);
+
                 UIntType W[80] = {0};
                 UIntType A = _h0, B = _h1, C = _h2, D = _h3, E = _h4;
 
