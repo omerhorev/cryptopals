@@ -19,6 +19,7 @@ namespace model
         class sha1
         {
         public:
+            static const size_t hash_size = 20;
 
             /**
              * Initializes the sha1 object
@@ -112,6 +113,8 @@ namespace model
                     throw model::internal_error("Cannot update state (the buffer is not full)");
                 }
 
+                utils::print_blocked_buffer(_buffer, sizeof(_buffer), 8);
+
                 UIntType W[80] = {0};
                 UIntType A = _h0, B = _h1, C = _h2, D = _h3, E = _h4;
 
@@ -148,7 +151,7 @@ namespace model
 
             void encode_hash(const unsigned char o_hash[], size_t length) const
             {
-                if (length < 20)
+                if (length < hash_size)
                 {
                     throw std::length_error("Not enough space in the hash vector provided");
                 }
