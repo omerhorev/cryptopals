@@ -1,13 +1,13 @@
 //
-// Created by omerh on 18/11/2019.
+// Created by omerh on 29/11/2019.
 //
 
-#ifndef CRYPTOPALS_SHA1_H
-#define CRYPTOPALS_SHA1_H
+#ifndef CRYPTOPALS_MD4_H
+#define CRYPTOPALS_MD4_H
 
 #include <cstddef>
-#include <model/internal/utils.h>
 #include <model/exceptions.h>
+#include <model/internal/utils.h>
 
 namespace model
 {
@@ -16,15 +16,17 @@ namespace model
         namespace hash
         {
             template<class UIntType, class LengthType, UIntType H0, UIntType H1, UIntType H2, UIntType H3, UIntType H4>
-            class sha1
+            class md4
             {
+
             public:
                 static const size_t hash_size = 20;
 
                 /**
                  * Initializes the sha1 object
                  */
-                sha1() : _h0(H0), _h1(H1), _h2(H2), _h3(H3), _h4(H4), _buffer_index(0), _buffer(), _message_length(0)
+                md4() : _h0(H0), _h1(H1), _h2(H2), _h3(H3), _h4(H4), _buffer_index(0), _buffer(),
+                         _message_length(0)
                 {}
 
                 /**
@@ -98,7 +100,8 @@ namespace model
                     // Encode the length
                     model::internal::endianness_encoder<LengthType, model::internal::endianness::big>::encode(
                             _message_length * CHAR_BIT,
-                            *((unsigned char (*)[sizeof(LengthType)]) &_buffer[sizeof(_buffer) - sizeof(LengthType)]));
+                            *((unsigned char (*)[sizeof(LengthType)]) &_buffer[sizeof(_buffer) -
+                                                                               sizeof(LengthType)]));
                     _buffer_index += sizeof(LengthType);
 
                     update_state();
@@ -118,7 +121,8 @@ namespace model
 
                     for (unsigned int i = 0; i < 16; ++i)
                     {
-                        W[i] = encoder::decode(*((unsigned char (*)[sizeof(UIntType)]) &_buffer[i * sizeof(UIntType)]));
+                        W[i] = encoder::decode(
+                                *((unsigned char (*)[sizeof(UIntType)]) &_buffer[i * sizeof(UIntType)]));
                     }
 
                     for (unsigned int t = 16; t < 80; ++t)
@@ -128,7 +132,8 @@ namespace model
 
                     for (unsigned int t = 0; t < 80; ++t)
                     {
-                        UIntType temp = model::internal::circular_left_shift(A, 5) + f(t, B, C, D) + E + W[t] + K(t);
+                        UIntType temp =
+                                model::internal::circular_left_shift(A, 5) + f(t, B, C, D) + E + W[t] + K(t);
 
                         E = D;
                         D = C;
@@ -199,8 +204,10 @@ namespace model
                 UIntType _h3;
                 UIntType _h4;
             };
-        }
+
+        };
     }
 }
+}
 
-#endif //CRYPTOPALS_SHA1_H
+#endif //CRYPTOPALS_MD4_H
