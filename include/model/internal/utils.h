@@ -38,7 +38,7 @@ namespace model
              * @param t      The object to encode
              * @param buffer The buffer to encode into, must be in the size of the object.
              */
-            static void encode(T t, T_sized_buffer_reference_t buffer)
+            static void encode(T t, unsigned char (&buffer)[sizeof(T)])
             {
                 for (unsigned char &i : buffer)
                 {
@@ -46,6 +46,19 @@ namespace model
                     i = static_cast<unsigned char>(first_byte);
                     t >>= 8;
                 }
+            }
+
+            static T decode(unsigned char (&buffer)[sizeof(T)])
+            {
+                T val = 0;
+
+                for (auto i = 0; i < sizeof(T); i++)
+                {
+                    val <<= CHAR_BIT;
+                    val |= buffer[sizeof(T) - i - 1];
+                }
+
+                return val;
             }
         };
 
