@@ -6,6 +6,7 @@
 #include <breaks/byte-at-a-time-ecb-decryption.h>
 #include <breaks/bitflipping.h>
 #include <utils/random.h>
+#include <utils/debug.h>
 
 // The fixture for testing class Foo.
 class set_2_8 : public ::testing::Test

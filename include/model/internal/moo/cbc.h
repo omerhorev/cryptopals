@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <algorithm>
 #include <utils/general.h>
-#include <utils/debug.h>
 
 namespace model
 {

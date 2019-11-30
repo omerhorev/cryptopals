@@ -6,8 +6,9 @@
 #define CRYPTOPALS_MD4_H
 
 #include <cstddef>
-#include <model/exceptions.h>
+#include <algorithm>
 #include <model/internal/utils.h>
+#include <model/exceptions.h>
 
 namespace model
 {
@@ -15,18 +16,19 @@ namespace model
     {
         namespace hash
         {
-            template<class UIntType, class LengthType, UIntType H0, UIntType H1, UIntType H2, UIntType H3, UIntType H4>
+            template<class UIntType, class LengthType, UIntType A, UIntType B, UIntType C, UIntType D>
             class md4
             {
+            private:
+                using encoder = model::internal::endianness_encoder<UIntType, model::internal::endianness::little>;
 
             public:
-                static const size_t hash_size = 20;
+                static const size_t hash_size = 16;
 
                 /**
                  * Initializes the sha1 object
                  */
-                md4() : _h0(H0), _h1(H1), _h2(H2), _h3(H3), _h4(H4), _buffer_index(0), _buffer(),
-                         _message_length(0)
+                md4() : _a(A), _b(B), _c(C), _d(D), _buffer_index(0), _buffer(), _message_length(0)
                 {}
 
                 /**
@@ -67,11 +69,10 @@ namespace model
                  */
                 void reset()
                 {
-                    _h0 = H0;
-                    _h1 = H1;
-                    _h2 = H2;
-                    _h3 = H3;
-                    _h4 = H4;
+                    _a = A;
+                    _b = B;
+                    _c = C;
+                    _d = D;
                     _buffer_index = 0;
                     std::fill_n(_buffer, sizeof(_buffer), 0);
                     _message_length = 0;
@@ -98,10 +99,9 @@ namespace model
                     }
 
                     // Encode the length
-                    model::internal::endianness_encoder<LengthType, model::internal::endianness::big>::encode(
+                    model::internal::endianness_encoder<LengthType, model::internal::endianness::little>::encode(
                             _message_length * CHAR_BIT,
-                            *((unsigned char (*)[sizeof(LengthType)]) &_buffer[sizeof(_buffer) -
-                                                                               sizeof(LengthType)]));
+                            *((unsigned char (*)[sizeof(LengthType)]) &_buffer[sizeof(_buffer) - sizeof(LengthType)]));
                     _buffer_index += sizeof(LengthType);
 
                     update_state();
@@ -109,46 +109,81 @@ namespace model
 
                 void update_state()
                 {
-                    using encoder = model::internal::endianness_encoder<UIntType, model::internal::endianness::big>;
-
                     if (_buffer_index != sizeof(_buffer))
                     {
                         throw model::internal_error("Cannot update state (the buffer is not full)");
                     }
 
-                    UIntType W[80] = {0};
-                    UIntType A = _h0, B = _h1, C = _h2, D = _h3, E = _h4;
+                    UIntType x[16];
 
-                    for (unsigned int i = 0; i < 16; ++i)
+                    for (int i = 0; i < 16; ++i)
                     {
-                        W[i] = encoder::decode(
-                                *((unsigned char (*)[sizeof(UIntType)]) &_buffer[i * sizeof(UIntType)]));
+                        x[i] = encoder::decode(*((unsigned char (*)[sizeof(UIntType)]) (_buffer + i * 4)));
                     }
 
-                    for (unsigned int t = 16; t < 80; ++t)
-                    {
-                        W[t] = model::internal::circular_left_shift(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
-                    }
+                    UIntType AA = _a;
+                    UIntType BB = _b;
+                    UIntType CC = _c;
+                    UIntType DD = _d;
 
-                    for (unsigned int t = 0; t < 80; ++t)
-                    {
-                        UIntType temp =
-                                model::internal::circular_left_shift(A, 5) + f(t, B, C, D) + E + W[t] + K(t);
+                    update_round_type1(_a, _b, _c, _d, x[0], 3);
+                    update_round_type1(_d, _a, _b, _c, x[1], 7);
+                    update_round_type1(_c, _d, _a, _b, x[2], 11);
+                    update_round_type1(_b, _c, _d, _a, x[3], 19);
+                    update_round_type1(_a, _b, _c, _d, x[4], 3);
+                    update_round_type1(_d, _a, _b, _c, x[5], 7);
+                    update_round_type1(_c, _d, _a, _b, x[6], 11);
+                    update_round_type1(_b, _c, _d, _a, x[7], 19);
+                    update_round_type1(_a, _b, _c, _d, x[8], 3);
+                    update_round_type1(_d, _a, _b, _c, x[9], 7);
+                    update_round_type1(_c, _d, _a, _b, x[10], 11);
+                    update_round_type1(_b, _c, _d, _a, x[11], 19);
+                    update_round_type1(_a, _b, _c, _d, x[12], 3);
+                    update_round_type1(_d, _a, _b, _c, x[13], 7);
+                    update_round_type1(_c, _d, _a, _b, x[14], 11);
+                    update_round_type1(_b, _c, _d, _a, x[15], 19);
 
-                        E = D;
-                        D = C;
-                        C = circular_left_shift(B, 30);
-                        B = A;
-                        A = temp;
-                    }
+                    update_round_type2(_a, _b, _c, _d, x[0], 3);
+                    update_round_type2(_d, _a, _b, _c, x[4], 5);
+                    update_round_type2(_c, _d, _a, _b, x[8], 9);
+                    update_round_type2(_b, _c, _d, _a, x[12], 13);
+                    update_round_type2(_a, _b, _c, _d, x[1], 3);
+                    update_round_type2(_d, _a, _b, _c, x[5], 5);
+                    update_round_type2(_c, _d, _a, _b, x[9], 9);
+                    update_round_type2(_b, _c, _d, _a, x[13], 13);
+                    update_round_type2(_a, _b, _c, _d, x[2], 3);
+                    update_round_type2(_d, _a, _b, _c, x[6], 5);
+                    update_round_type2(_c, _d, _a, _b, x[10], 9);
+                    update_round_type2(_b, _c, _d, _a, x[14], 13);
+                    update_round_type2(_a, _b, _c, _d, x[3], 3);
+                    update_round_type2(_d, _a, _b, _c, x[7], 5);
+                    update_round_type2(_c, _d, _a, _b, x[11], 9);
+                    update_round_type2(_b, _c, _d, _a, x[15], 13);
 
-                    _h0 += A;
-                    _h1 += B;
-                    _h2 += C;
-                    _h3 += D;
-                    _h4 += E;
+                    update_round_type3(_a, _b, _c, _d, x[0], 3);
+                    update_round_type3(_d, _a, _b, _c, x[8], 9);
+                    update_round_type3(_c, _d, _a, _b, x[4], 11);
+                    update_round_type3(_b, _c, _d, _a, x[12], 15);
+                    update_round_type3(_a, _b, _c, _d, x[2], 3);
+                    update_round_type3(_d, _a, _b, _c, x[10], 9);
+                    update_round_type3(_c, _d, _a, _b, x[6], 11);
+                    update_round_type3(_b, _c, _d, _a, x[14], 15);
+                    update_round_type3(_a, _b, _c, _d, x[1], 3);
+                    update_round_type3(_d, _a, _b, _c, x[9], 9);
+                    update_round_type3(_c, _d, _a, _b, x[5], 11);
+                    update_round_type3(_b, _c, _d, _a, x[13], 15);
+                    update_round_type3(_a, _b, _c, _d, x[3], 3);
+                    update_round_type3(_d, _a, _b, _c, x[11], 9);
+                    update_round_type3(_c, _d, _a, _b, x[7], 11);
+                    update_round_type3(_b, _c, _d, _a, x[15], 15);
 
-                    std::fill_n(_buffer, sizeof(_buffer), 0);
+                    _a += AA;
+                    _b += BB;
+                    _c += CC;
+                    _d += DD;
+
+                    std::fill_n(_buffer,
+                                sizeof(_buffer), 0);
                     _buffer_index = 0;
                 }
 
@@ -159,37 +194,53 @@ namespace model
                         throw std::length_error("Not enough space in the hash vector provided");
                     }
 
-                    model::internal::endianness_encoder<UIntType, model::internal::endianness::big>::encode(
-                            _h0, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 0]));
-                    model::internal::endianness_encoder<UIntType, model::internal::endianness::big>::encode(
-                            _h1, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 1]));
-                    model::internal::endianness_encoder<UIntType, model::internal::endianness::big>::encode(
-                            _h2, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 2]));
-                    model::internal::endianness_encoder<UIntType, model::internal::endianness::big>::encode(
-                            _h3, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 3]));
-                    model::internal::endianness_encoder<UIntType, model::internal::endianness::big>::encode(
-                            _h4, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 4]));
+                    encoder::encode(_a, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 0]));
+                    encoder::encode(_b, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 1]));
+                    encoder::encode(_c, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 2]));
+                    encoder::encode(_d, *((unsigned char (*)[sizeof(UIntType)]) &o_hash[sizeof(UIntType) * 3]));
                 }
 
-                constexpr UIntType f(unsigned int t, UIntType B, UIntType C, UIntType D) const
+                static constexpr UIntType F(UIntType X, UIntType Y, UIntType Z)
+                { return (X & Y) | (~X & Z); }
+
+                static constexpr UIntType G(UIntType X, UIntType Y, UIntType Z)
+                { return (X & Y) | (X & Z) | (Y & Z); }
+
+                static constexpr UIntType H(UIntType X, UIntType Y, UIntType Z)
+                { return X ^ Y ^ Z; }
+
+                static constexpr void update_round_type1(UIntType &a,
+                                                         UIntType &b,
+                                                         UIntType &c,
+                                                         UIntType &d,
+                                                         UIntType x,
+                                                         UIntType s)
                 {
-                    if (t >= 0 && t < 20) return (B & C) | ((~B) & D);
-                    else if (t >= 20 && t < 40) return B ^ C ^ D;
-                    else if (t >= 40 && t < 60) return (B & C) | (B & D) | (C & D);
-                    else if (t >= 60 && t < 80) return B ^ C ^ D;
-                    else throw internal_error("Invalid round for sha1::f");
+                    a += F(b, c, d) + x;
+                    a = model::internal::circular_left_shift(a, s);
                 }
 
-                constexpr UIntType K(unsigned int t) const
+                static constexpr void update_round_type2(UIntType &a,
+                                                         UIntType &b,
+                                                         UIntType &c,
+                                                         UIntType &d,
+                                                         UIntType x,
+                                                         UIntType s)
                 {
-                    if (t >= 0 && t < 20) return 0x5A827999;
-                    else if (t >= 20 && t < 40) return 0x6ED9EBA1;
-                    else if (t >= 40 && t < 60) return 0x8F1BBCDC;
-                    else if (t >= 60 && t < 80) return 0xCA62C1D6;
-
-                    else throw internal_error("Invalid round for sha1::K");
+                    a += G(b, c, d) + x + 0x5A827999;
+                    a = model::internal::circular_left_shift(a, s);
                 }
 
+                static constexpr void update_round_type3(UIntType &a,
+                                                         UIntType &b,
+                                                         UIntType &c,
+                                                         UIntType &d,
+                                                         UIntType x,
+                                                         UIntType s)
+                {
+                    a += H(b, c, d) + x + 0x6ED9EBA1;
+                    a = model::internal::circular_left_shift(a, s);
+                }
 
             private:
 
@@ -198,16 +249,14 @@ namespace model
                 size_t _buffer_index;
                 unsigned char _buffer[64];
 
-                UIntType _h0;
-                UIntType _h1;
-                UIntType _h2;
-                UIntType _h3;
-                UIntType _h4;
+                UIntType _a;
+                UIntType _b;
+                UIntType _c;
+                UIntType _d;
             };
 
         };
     }
-}
 }
 
 #endif //CRYPTOPALS_MD4_H

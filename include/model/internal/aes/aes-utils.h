@@ -6,7 +6,6 @@
 #define CRYPTOPALS_AES_UTILS_H
 
 #include <cstddef>
-#include <utils/debug.h>
 #include "utils/general.h"
 #include "math/galois-field.h"
 #include "aes-round-keys.h"

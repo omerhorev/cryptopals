@@ -6,6 +6,7 @@
 
 #include <model/internal/hash/sha1.h>
 #include <model/hash.h>
+#include <utils/hex.h>
 
 struct test_vectors
 {
@@ -215,5 +216,37 @@ TEST(hash, sha1)
         a.digest(hash, sizeof(hash));
 
         ASSERT_TRUE(std::equal(hash, hash + 20, test_vector.hash));
+    }
+}
+
+TEST(hash, md4)
+{
+    struct
+    {
+        const char *msg_string;
+        const char *hash_string;
+    } vectors[] =
+            {
+                    {"",                                                                                 "31d6cfe0d16ae931b73c59d7e0c089c0"},
+                    {"a",                                                                                "bde52cb31de33e46245e05fbdbd6fb24"},
+                    {"abc",                                                                              "a448017aaf21d8525fc10ae87aa6729d"},
+                    {"message digest",                                                                   "d9130a8164549fe818874806e1c7014b"},
+                    {"abcdefghijklmnopqrstuvwxyz",                                                       "d79e1c308aa5bbcdeea8ed63df412da9"},
+                    {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",                   "043f8582f241db351ce627e153e7f0e4"},
+                    {"12345678901234567890123456789012345678901234567890123456789012345678901234567890", "e33b4ddc9c38f2199c3e7b164fcc0536"}
+            };
+
+    for (const auto& vector : vectors)
+    {
+        unsigned char vector_hash[16];
+        unsigned char result[16];
+
+        utils::hex::decode(vector.hash_string, strlen(vector.hash_string), vector_hash, sizeof(vector_hash));
+
+        model::md4 _;
+        _.update((const unsigned char *)(vector.msg_string), strlen(vector.msg_string));
+        _.digest(result, sizeof(result));
+
+        ASSERT_TRUE(std::equal(result, result + 16, vector_hash));
     }
 }
