@@ -31,3 +31,35 @@ TEST(numbers, comparison)
 
     ASSERT_TRUE(e == 0xffffff0a);
 }
+
+TEST(numbers, addition)
+{
+    math::num512_t a = 0;
+    math::num512_t b = 1;
+    math::num512_t c = 0xff;
+    math::num512_t d = 0x100;
+
+    ASSERT_EQ(a + 1, b);
+    ASSERT_EQ(c + 1, 0x100);
+    ASSERT_EQ(a + c, c);
+    ASSERT_EQ(b + c, d);
+
+    a += b;
+    c += d;
+    b += 1;
+
+    ASSERT_EQ(a, 1);
+    ASSERT_EQ(a, 0xff + 0x100);
+    ASSERT_EQ(b, a + 1);
+}
+
+TEST(numbers, increment)
+{
+    math::num512_t a = 0xfd;
+
+    ASSERT_EQ(a++, 0xfd);
+    ASSERT_EQ(a, 0xfe);
+    ASSERT_EQ(++a, 0xff);
+    ASSERT_EQ(a++, 0xff);
+    ASSERT_EQ(a, 0x100);
+}

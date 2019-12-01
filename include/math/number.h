@@ -92,6 +92,11 @@ namespace math
             math::internal::bignum::set(_raw, bytes_count(), v_raw, sizeof(v_raw));
         }
 
+        /**
+         * Increment the value of the number by 1
+         *
+         * @return The number after the incrementation. =
+         */
         number &operator++()
         {
             unsigned char num = 1;
@@ -101,6 +106,11 @@ namespace math
             return *this;
         }
 
+        /**
+         * Increment the value of the number by 1
+         *
+         * @return The number before the incrementation
+         */
         const number operator++(int)
         {
             number tmp(*this); // copy
@@ -120,15 +130,29 @@ namespace math
             return tmp;   // return old value
         }
 
+        /**
+         * Adds a number to this number
+         *
+         * @param rhs The number to add
+         * @return This number after the addition
+         */
         number &operator+=(const number &rhs)
         {
-            /* addition of rhs to *this takes place here */
+            math::internal::bignum::add(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
             return *this;
         }
 
+        /**
+         * Adds an integer to this number
+         *
+         * @param rhs The integer to add
+         * @return This number after the addition
+         */
         number &operator+=(unsigned int rhs)
         {
-            /* addition of rhs to *this takes place here */
+            auto v = generate_be_uint_buffer(rhs);
+
+            math::internal::bignum::add(_raw, bytes_count(), v.data(), v.size());
             return *this;
         }
 
@@ -186,13 +210,31 @@ namespace math
         unsigned char _raw[BytesCount];
     };
 
+    /**
+     * Adds a type (can be anything supported) to the number provided
+     *
+     * @tparam BitSize The size in bits of the number provided
+     * @tparam T       The type of the object (currently only same-sized numbers and ints are supported) to add
+     * @param lhs      The number to add to (not a reference for better optimizations)
+     * @param rhs      The object to add to the number
+     * @return The new number after the addition
+     */
     template<unsigned int BitSize, class T>
     number<BitSize> operator+(number<BitSize> lhs, const T &rhs)
     {
-        lhs += rhs; // reuse compound assignment
+        lhs += rhs;
         return lhs; // return the result by value (uses move constructor)
     }
 
+    /**
+     * Adds a type (can be anything supported) to the number provided
+     *
+     * @tparam BitSize The size in bits of the number provided
+     * @tparam T       The type of the object (currently only same-sized numbers and ints are supported) to add
+     * @param lhs      The number to add to (not a reference for better optimizations)
+     * @param rhs      The object to add to the number
+     * @return The new number after the addition
+     */
     template<unsigned int BitSize, class T>
     number<BitSize> operator+(number<BitSize> lhs, const T &&rhs)
     {

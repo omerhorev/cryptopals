@@ -36,26 +36,34 @@ void bignum::add(unsigned char *number, size_t length, const unsigned char *valu
         throw std::runtime_error("The left side's max value must be grater or equal to the right side's max value");
     }
 
-    size_t smaller_size = std::min(length, value_length);
-
     unsigned char carry = 0;
+    number += length;
+    value += value_length;
 
-    for (auto i = 0; i < smaller_size; ++i)
+    for (auto i = 0; i < value_length; ++i)
     {
+        number--;
+        value--;
+
         //
         // 'a' for sure can hold both numbers
         //
-        unsigned int a = number[i] + value[i] + carry;
+        unsigned int a = *number + *value + carry;
         carry = (unsigned char) (a > 0xff ? 1 : 0);
+        *number = (unsigned char) (carry ? (a - 0x100) : a);
     }
 
-    for (auto i = smaller_size; i < length; ++i)
+    for (auto i = value_length; i < length; ++i)
     {
+        number--;
+        value--;
+
         //
         // 'a' for sure can hold both numbers
         //
-        unsigned int a = number[i] + carry;
+        unsigned int a = *number + carry;
         carry = (unsigned char) (a > 0xff ? 1 : 0);
+        *number = (unsigned char) (carry ? (a - 0x100) : a);
     }
 
     if (carry)
