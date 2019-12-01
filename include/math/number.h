@@ -5,7 +5,10 @@
 #ifndef CRYPTOPALS_NUMBER_H
 #define CRYPTOPALS_NUMBER_H
 
+#include <cstddef>
 #include <limits>
+#include <math/internal/bignum.h>
+#include <model/internal/utils.h>
 
 namespace math
 {
@@ -17,42 +20,84 @@ namespace math
     private:
         static constexpr unsigned int BytesCount = BitSize / CHAR_BIT;
 
-
     public:
 
+        /**
+         * Initialize a new number with value of 0
+         */
+        number() : number(0)
+        {}
 
-        number()
+        /**
+         * Initialize a new number with an integer value
+         *
+         * @param value The first value
+         */
+        number(unsigned int value)
         {
+            auto v = generate_be_uint_buffer(value);
 
+            math::internal::bignum::set(_raw, bytes_count(), v.data(), v.size());
         }
 
-        number(unsigned int)
+        /**
+         * Copy constructor. Copies the number from a different one
+         * @param other The over number to copy from
+         */
+        number(const number &other)
         {
-
+            math::internal::bignum::set(_raw, bytes_count(), other._raw, other.bytes_count());
         }
 
-        number(const number& other)
+        /**
+         * Copy constructor from a right value reference.
+         * @param other The number to copy from
+         */
+        number(const number &&other)
         {
-
+            math::internal::bignum::set(_raw, bytes_count(), other._raw, other.bytes_count());
         }
 
-        number &operator=(const number other)
+        /**
+         * Copy constructor from a left value reference.
+         * @param other The number to copy from
+         */
+        number &operator=(const number &other)
         {
+            math::internal::bignum::set(_raw, bytes_count(), other._raw, other.bytes_count());
             return *this;
         }
 
-        number &operator=(number &&other) noexcept // move assignment
+        /**
+         * Copy constructor from a right value reference.
+         * @param other The number to copy from
+         */
+        number &operator=(number &&other) noexcept
         {
+            math::internal::bignum::set(_raw, bytes_count(), other._raw, other.bytes_count());
             return *this;
         }
 
-        number &operator=(unsigned int other) noexcept // move assignment
+        /**
+         * Assigns a integer value to a number
+         *
+         * @param value The value to assign
+         * @return a reference to the object assigned to.
+         */
+        number &operator=(unsigned int value) noexcept
         {
-            return *this;
+            unsigned char v_raw[sizeof(value)];
+
+
+            math::internal::bignum::set(_raw, bytes_count(), v_raw, sizeof(v_raw));
         }
 
         number &operator++()
         {
+            unsigned char num = 1;
+
+            math::internal::bignum::add(_raw, bytes_count(), &num, sizeof(unsigned char));
+
             return *this;
         }
 
@@ -81,34 +126,98 @@ namespace math
             return *this;
         }
 
+        number &operator+=(unsigned int rhs)
+        {
+            /* addition of rhs to *this takes place here */
+            return *this;
+        }
+
         number &operator-=(const number &rhs)
         {
             /* addition of rhs to *this takes place here */
             return *this;
         }
 
+        number &operator-=(unsigned int &rhs)
+        {
+            /* addition of rhs to *this takes place here */
+            return *this;
+        }
+
+        /**
+         * Returns whether two numbers are equal
+         *
+         * @param rhs The second number
+         * @return Whether the two numbers are equal
+         */
+        bool operator==(const number<BitSize> &rhs) const
+        {
+            return math::internal::bignum::equal(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
+        }
+
+        /**
+         * Returns whether the number is equal to an integer
+         * @param value The integer to compare to
+         * @return Whether the number is equal to the integer provided
+         */
+        bool operator==(unsigned int value) const
+        {
+            auto v = generate_be_uint_buffer(value);
+            return math::internal::bignum::equal(_raw, bytes_count(), v.data(), v.size());
+        }
+
     private:
-        unsigned char raw[BytesCount];
+        template<class T>
+        static auto generate_be_uint_buffer(T value)
+        {
+            unsigned char _[sizeof(T)];
+
+            model::internal::endianness_encoder<unsigned int, model::internal::endianness::big>::encode(value, _);
+
+            return *((std::array<unsigned char, sizeof(T)> *) _);
+        }
+
+    private:
+
+        size_t bytes_count() const
+        { return BytesCount; }
+
+    private:
+        unsigned char _raw[BytesCount];
     };
 
-    template<unsigned int BitSize>
-    number<BitSize> operator+(number<BitSize> lhs, const number<BitSize> &rhs)
+    template<unsigned int BitSize, class T>
+    number<BitSize> operator+(number<BitSize> lhs, const T &rhs)
     {
         lhs += rhs; // reuse compound assignment
         return lhs; // return the result by value (uses move constructor)
     }
 
-    template<unsigned int BitSize>
-    number<BitSize> operator-(number<BitSize> lhs, const number<BitSize> &rhs)
+    template<unsigned int BitSize, class T>
+    number<BitSize> operator+(number<BitSize> lhs, const T &&rhs)
+    {
+        lhs += rhs; // reuse compound assignment
+        return lhs; // return the result by value (uses move constructor)
+    }
+
+    template<unsigned int BitSize, class T>
+    number<BitSize> operator-(number<BitSize> lhs, const T &rhs)
+    {
+        lhs -= rhs; // reuse compound assignment
+        return lhs; // return the result by value (uses move constructor)
+    }
+
+    template<unsigned int BitSize, class T>
+    number<BitSize> operator-(number<BitSize> lhs, const T &&rhs)
     {
         lhs -= rhs; // reuse compound assignment
         return lhs; // return the result by value (uses move constructor)
     }
 
     template<unsigned int BitSize>
-    inline bool operator==(const number<BitSize> &lhs, const number<BitSize> &rhs)
+    inline bool operator==(unsigned int lhs, const number<BitSize> &rhs)
     {
-        return false;
+        return rhs == lhs;
     }
 
     using num32_t = number<32>;
