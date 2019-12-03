@@ -156,15 +156,28 @@ namespace math
             return *this;
         }
 
+        /**
+         * Subtract from this number another number
+         * @param rhs The number to substract
+         * @return The result
+         */
         number &operator-=(const number &rhs)
         {
-            /* addition of rhs to *this takes place here */
+            math::internal::bignum::subtract(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
             return *this;
         }
 
+        /**
+         * Subtract from this number another integer
+         * @param rhs The integer to substract
+         * @return The result
+         */
         number &operator-=(unsigned int &rhs)
         {
-            /* addition of rhs to *this takes place here */
+            auto v = generate_be_uint_buffer(rhs);
+
+            math::internal::bignum::subtract(_raw, bytes_count(), v.data(), v.size());
+
             return *this;
         }
 

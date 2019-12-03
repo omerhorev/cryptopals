@@ -18,6 +18,8 @@ namespace math
 
             static void add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length);
 
+            static void subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length);
+
             static bool equal(const unsigned char *first, size_t first_length,
                                 const unsigned char *second, size_t second_length);
         };
