@@ -86,10 +86,9 @@ namespace math
          */
         number &operator=(unsigned int value) noexcept
         {
-            unsigned char v_raw[sizeof(value)];
+            auto v = generate_be_uint_buffer(value);
 
-
-            math::internal::bignum::set(_raw, bytes_count(), v_raw, sizeof(v_raw));
+            math::internal::bignum::set(_raw, bytes_count(), v.data(), v.size());
         }
 
         /**
