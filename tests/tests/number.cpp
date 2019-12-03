@@ -73,3 +73,12 @@ TEST(numbers, substraction)
     ASSERT_EQ(b - a, 0x1);
     ASSERT_EQ(c - a, 0x100 - 0x2);
 }
+
+TEST(numbers, decreasement)
+{
+    math::num512_t a = 0x100;
+
+    ASSERT_EQ(a--, 0x100);
+    ASSERT_EQ(a, 0xff);
+    ASSERT_EQ(--a, 0xfe);
+}
