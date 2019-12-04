@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <math/number.h>
+#include <math/numbers.h>
 
 
 TEST(numbers, comparison)
@@ -49,7 +49,7 @@ TEST(numbers, addition)
     b += 1;
 
     ASSERT_EQ(a, 1);
-    ASSERT_EQ(a, 0xff + 0x100);
+    ASSERT_EQ(c, 0xff + 0x100);
     ASSERT_EQ(b, a + 1);
 }
 

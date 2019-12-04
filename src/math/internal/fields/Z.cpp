@@ -2,14 +2,15 @@
 // Created by omerh on 01/12/2019.
 //
 
-#include <math/internal/bignum.h>
+#include <math/internal/fields/Z.h>
 #include <algorithm>
 #include <stdexcept>
 
 using namespace math;
 using namespace math::internal;
+using namespace math::internal::fields;
 
-void bignum::add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void Z::add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     /**
      *     78 a4
@@ -72,7 +73,7 @@ void bignum::add(unsigned char *number, size_t length, const unsigned char *valu
     }
 }
 
-void bignum::subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void Z::subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     /**
      *     87 33
@@ -119,12 +120,11 @@ void bignum::subtract(unsigned char *number, size_t length, const unsigned char 
     for (auto i = value_length; i < length; ++i)
     {
         number--;
-        value--;
 
         //
         // 'a' for sure can hold both numbers
         //
-        unsigned int a = *number - carry;
+        unsigned int a = (0x100ul + *number) - carry;
         carry = (unsigned char) (a < 0x100 ? 1 : 0);
         *number = (unsigned char) (carry ? a : a - 0x100);
     }
@@ -135,7 +135,7 @@ void bignum::subtract(unsigned char *number, size_t length, const unsigned char 
     }
 }
 
-void bignum::set(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void Z::set(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     if (length < value_length)
     { throw std::runtime_error("The left side's max value must be grater or equal to the right side's max value"); }
@@ -144,7 +144,7 @@ void bignum::set(unsigned char *number, size_t length, const unsigned char *valu
     std::fill_n(number, length - value_length, 0);
 }
 
-bool bignum::equal(const unsigned char *first, size_t first_length, const unsigned char *second, size_t second_length)
+int Z::compare(const unsigned char *first, size_t first_length, const unsigned char *second, size_t second_length)
 {
     auto bigger_length = std::max(first_length, second_length);
     auto smaller_length = std::min(first_length, second_length);
@@ -152,13 +152,16 @@ bool bignum::equal(const unsigned char *first, size_t first_length, const unsign
     const unsigned char *bigger = (first_length > second_length) ? first : second;
     const unsigned char *smaller = (first_length > second_length) ? second : first;
 
-    bool eq = true;
+    int eq = 0;
 
     for (auto i = 0; i < smaller_length; i++)
     {
         if (bigger[bigger_length - i - 1] != smaller[smaller_length - i - 1])
         {
-            eq = false;
+            if (eq == 0)
+            {
+                eq = bigger[bigger_length - i - 1] > smaller[smaller_length - i - 1] ? 1 : -1;
+            }
             //
             // Do not 'break' or 'return' here! this is done to prevent timing attacks
             //
@@ -169,12 +172,23 @@ bool bignum::equal(const unsigned char *first, size_t first_length, const unsign
     {
         if (bigger[bigger_length - i - 1] != 0)
         {
-            eq = false;
+            eq = 1;
             //
             // Do not 'break' or 'return' here! this is done to prevent timing attacks
             //
         }
     }
 
-    return eq;
+    if (eq == 1)
+    {
+        return (first_length > second_length) ? 1 : -1;
+    }
+    else if (eq == -1)
+    {
+        return (first_length < second_length) ? 1 : -1;
+    }
+    else
+    {
+        return 0;
+    }
 }
