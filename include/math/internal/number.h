@@ -142,6 +142,17 @@ namespace math
             }
 
             /**
+             * Returns whether the two numbers are different
+             *
+             * @param rhs The second number
+             * @return Whether the two numbers are different
+             */
+            bool operator!=(const number<BitSize> &rhs) const
+            {
+                return !operator==(rhs);
+            }
+
+            /**
              * Returns whether the number is equal to an integer
              * @param value The integer to compare to
              * @return Whether the number is equal to the integer provided
@@ -150,6 +161,107 @@ namespace math
             {
                 auto v = generate_be_uint_buffer(value);
                 return _field->compare(_raw, bytes_count(), v.data(), v.size()) == 0;
+            }
+
+            /**
+             * Returns whether the number is different from an integer
+             * @param value The integer to compare to
+             * @return Whether the number is different from an integer
+             */
+            bool operator!=(unsigned int value) const
+            {
+                return !operator==(value);
+            }
+
+            /**
+             * Returns whether the number is bigger and not equal to another
+             *
+             * @param rhs The second number
+             * @return Whether the number is bigger and not equal to another
+             */
+            bool operator>(const number<BitSize> &rhs) const
+            {
+                return _field->compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == 1;
+            }
+
+            /**
+             * Returns whether the number is bigger and not equal to an integer
+             *
+             * @param rhs The integer
+             * @return Whether the number is bigger and not equal to integer
+             */
+            bool operator>(unsigned int value) const
+            {
+                auto v = generate_be_uint_buffer(value);
+                return _field->compare(_raw, bytes_count(), v.data(), v.size()) == 1;
+            }
+
+            /**
+             * Returns whether the number is smaller and not equal to another
+             *
+             * @param rhs The second number
+             * @return Whether the number is smaller and not equal to another
+             */
+            bool operator<(const number<BitSize> &rhs) const
+            {
+                return _field->compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == -1;
+            }
+
+            /**
+             * Returns whether the number is smaller and not equal to an integer
+             *
+             * @param rhs The integer
+             * @return Whether the number is smaller and not equal to integer
+             */
+            bool operator<(unsigned int value) const
+            {
+                auto v = generate_be_uint_buffer(value);
+                return _field->compare(_raw, bytes_count(), v.data(), v.size()) == -1;
+            }
+
+            /**
+             * Returns whether the number is smaller or equal to another
+             *
+             * @param rhs The second number
+             * @return Whether the number is smaller or equal to another
+             */
+            bool operator<=(const number<BitSize> &rhs) const
+            {
+                return !operator>(rhs);
+            }
+
+            /**
+             * Returns whether the number is smaller or equal to an integer
+             *
+             * @param rhs The integer
+             * @return Whether the number is smaller or equal to integer
+             */
+            bool operator<=(unsigned int value) const
+            {
+                return !operator>(value);
+            }
+
+
+            /**
+             * Returns whether the number is bigger or equal to another
+             *
+             * @param rhs The second number
+             * @return Whether the number is bigger or equal to another
+             */
+            bool operator>=(const number<BitSize> &rhs) const
+            {
+                return !operator<(rhs);
+            }
+
+            /**
+             * Returns whether the number is bigger or equal to an integer
+             *
+             * @param rhs The integer
+             * @return Whether the number is bigger or equal to integer
+             */
+            bool operator>=(unsigned int value) const
+            {
+                return !operator<(value);
             }
 
         private:
@@ -220,10 +332,40 @@ namespace math
             return lhs; // return the result by value (uses move constructor)
         }
 
-        template<unsigned int BitSize>
-        inline bool operator==(unsigned int lhs, const number<BitSize> &rhs)
+        template <unsigned int BitSize, class T>
+        bool operator==(const T& lhs, const number<BitSize>& num)
         {
-            return rhs == lhs;
+            return num == lhs;
+        }
+
+        template <unsigned int BitSize, class T>
+        bool operator!=(const T& lhs, const number<BitSize>& num)
+        {
+            return num != lhs;
+        }
+
+        template <unsigned int BitSize, class T>
+        bool operator<(const T& lhs, const number<BitSize>& num)
+        {
+            return num > lhs;
+        }
+
+        template <unsigned int BitSize, class T>
+        bool operator<=(const T& lhs, const number<BitSize>& num)
+        {
+            return num >= lhs;
+        }
+
+        template <unsigned int BitSize, class T>
+        bool operator>(const T& lhs, const number<BitSize>& num)
+        {
+            return num < lhs;
+        }
+
+        template <unsigned int BitSize, class T>
+        bool operator>=(const T& lhs, const number<BitSize>& num)
+        {
+            return num <= lhs;
         }
     }
 }

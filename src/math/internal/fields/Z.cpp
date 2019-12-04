@@ -185,7 +185,7 @@ int Z::compare(const unsigned char *first, size_t first_length, const unsigned c
     }
     else if (eq == -1)
     {
-        return (first_length < second_length) ? 1 : -1;
+        return (first_length > second_length) ? -1 : 1;
     }
     else
     {

@@ -30,6 +30,16 @@ TEST(numbers, comparison)
     ASSERT_TRUE(d == 0xffffff);
 
     ASSERT_TRUE(e == 0xffffff0a);
+
+    ASSERT_FALSE(a != 1);
+    ASSERT_FALSE(1 != a);
+    ASSERT_TRUE(a != 2);
+    ASSERT_TRUE(2 != a);
+
+    ASSERT_FALSE(a != b);
+    ASSERT_FALSE(b != a);
+    ASSERT_TRUE(a != b);
+    ASSERT_TRUE(b != a);
 }
 
 TEST(numbers, addition)
@@ -81,4 +91,56 @@ TEST(numbers, decreasement)
     ASSERT_EQ(a--, 0x100);
     ASSERT_EQ(a, 0xff);
     ASSERT_EQ(--a, 0xfe);
+}
+
+TEST(numbers, compare)
+{
+    math::num512_t a = 10;
+    math::num512_t _1 = 1;
+    math::num512_t _10 = 10;
+    math::num512_t _20 = 20;
+
+    ASSERT_TRUE(a > 1);
+    ASSERT_TRUE(a > _1);
+    ASSERT_TRUE(1 < a);
+    ASSERT_TRUE(_1 < a);
+    ASSERT_FALSE(a < 1);
+    ASSERT_FALSE(a < _1);
+    ASSERT_FALSE(1 > a);
+    ASSERT_FALSE(_1 > a);
+
+    ASSERT_TRUE(a < 20);
+    ASSERT_TRUE(a < _20);
+    ASSERT_TRUE(20 > a);
+    ASSERT_TRUE(_20 > a);
+    ASSERT_FALSE(a > 20);
+    ASSERT_FALSE(a > _20);
+    ASSERT_FALSE(20 < a);
+    ASSERT_FALSE(_20 < a);
+
+    ASSERT_TRUE(a >= 1);
+    ASSERT_TRUE(a >= _1);
+    ASSERT_TRUE(1 <= a);
+    ASSERT_TRUE(_1 <= a);
+    ASSERT_FALSE(a <= 1);
+    ASSERT_FALSE(a <= _1);
+    ASSERT_FALSE(1 >= a);
+    ASSERT_FALSE(_1 >= a);
+    ASSERT_TRUE(a <= 10);
+    ASSERT_TRUE(a <= _10);
+    ASSERT_TRUE(10 >= a);
+    ASSERT_TRUE(_10 >= a);
+
+    ASSERT_TRUE(a <= 20);
+    ASSERT_TRUE(a <= _20);
+    ASSERT_TRUE(20 >= a);
+    ASSERT_TRUE(_20 >= a);
+    ASSERT_FALSE(a >= 20);
+    ASSERT_FALSE(a >= _20);
+    ASSERT_FALSE(20 <= a);
+    ASSERT_FALSE(_20 <= a);
+    ASSERT_TRUE(a >= 10);
+    ASSERT_TRUE(a >= _10);
+    ASSERT_TRUE(10 <= a);
+    ASSERT_TRUE(_10 <= a);
 }
