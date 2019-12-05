@@ -2,15 +2,14 @@
 // Created by omerh on 01/12/2019.
 //
 
-#include <math/internal/fields/Z.h>
+#include <math/internal/bignum.h>
 #include <algorithm>
 #include <stdexcept>
 
 using namespace math;
 using namespace math::internal;
-using namespace math::internal::fields;
 
-void Z::add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void bignum::add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     /**
      *     78 a4
@@ -73,7 +72,7 @@ void Z::add(unsigned char *number, size_t length, const unsigned char *value, si
     }
 }
 
-void Z::subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void bignum::subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     /**
      *     87 33
@@ -135,7 +134,7 @@ void Z::subtract(unsigned char *number, size_t length, const unsigned char *valu
     }
 }
 
-void Z::set(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
+void bignum::set(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
     if (length < value_length)
     { throw std::runtime_error("The left side's max value must be grater or equal to the right side's max value"); }
@@ -144,7 +143,7 @@ void Z::set(unsigned char *number, size_t length, const unsigned char *value, si
     std::fill_n(number, length - value_length, 0);
 }
 
-int Z::compare(const unsigned char *first, size_t first_length, const unsigned char *second, size_t second_length)
+int bignum::compare(const unsigned char *first, size_t first_length, const unsigned char *second, size_t second_length)
 {
     auto bigger_length = std::max(first_length, second_length);
     auto smaller_length = std::min(first_length, second_length);

@@ -36,8 +36,8 @@ TEST(numbers, comparison)
     ASSERT_TRUE(a != 2);
     ASSERT_TRUE(2 != a);
 
-    ASSERT_FALSE(a != b);
-    ASSERT_FALSE(b != a);
+    ASSERT_FALSE(a == b);
+    ASSERT_FALSE(b == a);
     ASSERT_TRUE(a != b);
     ASSERT_TRUE(b != a);
 }

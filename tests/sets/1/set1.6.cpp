@@ -17,7 +17,7 @@ static const char vector_key[] = "Terminator X: Bring the noise";
 static const char vector_plain[] = "I'm back and I'm ringin' the bell \n"
                                    "A rockin' on the mike while the fly girls yell \n"
                                    "In ecstasy in the back of me \n"
-                                   "Well that's my DJ Deshay cuttin' all them Z's \n"
+                                   "Well that's my DJ Deshay cuttin' all them bignum's \n"
                                    "Hittin' hard and the girlies goin' crazy \n"
                                    "Vanilla's on the mike, man I'm not lazy. \n"
                                    "\n"

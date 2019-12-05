@@ -7,8 +7,8 @@
 
 #include <cstddef>
 #include <limits>
-#include <math/internal/fields/field.h>
 #include <model/internal/utils.h>
+#include "bignum.h"
 
 namespace math
 {
@@ -27,7 +27,7 @@ namespace math
             /**
              * Initialize a new number with value of 0
              */
-            number(fields::field *field) : number(_field, 0)
+            number() : number(0)
             {}
 
             /**
@@ -35,11 +35,11 @@ namespace math
              *
              * @param value The first value
              */
-            number(fields::field *field, unsigned int value) : _field(field)
+            number(unsigned int value)
             {
                 auto v = generate_be_uint_buffer(value);
 
-                _field->set(_raw, bytes_count(), v.data(), v.size());
+                bignum::set(_raw, bytes_count(), v.data(), v.size());
             }
 
             /**
@@ -87,7 +87,7 @@ namespace math
              */
             number &operator+=(const number &rhs)
             {
-                _field->add(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
+                bignum::add(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
                 return *this;
             }
 
@@ -101,7 +101,7 @@ namespace math
             {
                 auto v = generate_be_uint_buffer(rhs);
 
-                _field->add(_raw, bytes_count(), v.data(), v.size());
+                bignum::add(_raw, bytes_count(), v.data(), v.size());
                 return *this;
             }
 
@@ -112,7 +112,7 @@ namespace math
              */
             number &operator-=(const number &rhs)
             {
-                _field->subtract(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
+                bignum::subtract(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
                 return *this;
             }
 
@@ -125,7 +125,7 @@ namespace math
             {
                 auto v = generate_be_uint_buffer(rhs);
 
-                _field->subtract(_raw, bytes_count(), v.data(), v.size());
+                bignum::subtract(_raw, bytes_count(), v.data(), v.size());
 
                 return *this;
             }
@@ -138,7 +138,7 @@ namespace math
              */
             bool operator==(const number<BitSize> &rhs) const
             {
-                return _field->compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == 0;
+                return bignum::compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == 0;
             }
 
             /**
@@ -160,7 +160,7 @@ namespace math
             bool operator==(unsigned int value) const
             {
                 auto v = generate_be_uint_buffer(value);
-                return _field->compare(_raw, bytes_count(), v.data(), v.size()) == 0;
+                return bignum::compare(_raw, bytes_count(), v.data(), v.size()) == 0;
             }
 
             /**
@@ -181,7 +181,7 @@ namespace math
              */
             bool operator>(const number<BitSize> &rhs) const
             {
-                return _field->compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == 1;
+                return bignum::compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == 1;
             }
 
             /**
@@ -193,7 +193,7 @@ namespace math
             bool operator>(unsigned int value) const
             {
                 auto v = generate_be_uint_buffer(value);
-                return _field->compare(_raw, bytes_count(), v.data(), v.size()) == 1;
+                return bignum::compare(_raw, bytes_count(), v.data(), v.size()) == 1;
             }
 
             /**
@@ -204,7 +204,7 @@ namespace math
              */
             bool operator<(const number<BitSize> &rhs) const
             {
-                return _field->compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == -1;
+                return bignum::compare(_raw, bytes_count(), rhs._raw, rhs.bytes_count()) == -1;
             }
 
             /**
@@ -216,7 +216,7 @@ namespace math
             bool operator<(unsigned int value) const
             {
                 auto v = generate_be_uint_buffer(value);
-                return _field->compare(_raw, bytes_count(), v.data(), v.size()) == -1;
+                return bignum::compare(_raw, bytes_count(), v.data(), v.size()) == -1;
             }
 
             /**
@@ -281,8 +281,6 @@ namespace math
             { return BytesCount; }
 
         private:
-
-            fields::field *_field;
             unsigned char _raw[BytesCount];
         };
 
@@ -332,38 +330,38 @@ namespace math
             return lhs; // return the result by value (uses move constructor)
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator==(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator==(const T &lhs, const number<BitSize> &num)
         {
             return num == lhs;
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator!=(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator!=(const T &lhs, const number<BitSize> &num)
         {
             return num != lhs;
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator<(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator<(const T &lhs, const number<BitSize> &num)
         {
             return num > lhs;
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator<=(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator<=(const T &lhs, const number<BitSize> &num)
         {
             return num >= lhs;
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator>(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator>(const T &lhs, const number<BitSize> &num)
         {
             return num < lhs;
         }
 
-        template <unsigned int BitSize, class T>
-        bool operator>=(const T& lhs, const number<BitSize>& num)
+        template<unsigned int BitSize, class T>
+        bool operator>=(const T &lhs, const number<BitSize> &num)
         {
             return num <= lhs;
         }

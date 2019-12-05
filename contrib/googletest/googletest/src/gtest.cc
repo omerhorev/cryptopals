@@ -4076,7 +4076,7 @@ static std::string FormatEpochTimeInMillisAsRFC3339(TimeInMillis ms) {
       String::FormatIntWidth2(time_struct.tm_mday) + "T" +
       String::FormatIntWidth2(time_struct.tm_hour) + ":" +
       String::FormatIntWidth2(time_struct.tm_min) + ":" +
-      String::FormatIntWidth2(time_struct.tm_sec) + "Z";
+      String::FormatIntWidth2(time_struct.tm_sec) + "bignum";
 }
 
 static inline std::string Indent(size_t width) {
