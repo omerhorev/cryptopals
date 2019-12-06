@@ -65,7 +65,26 @@ namespace math
             static int compare(const unsigned char *first, size_t first_length,
                                const unsigned char *second, size_t second_length);
 
+            /**
+             * Calculate the modulus of a number inplace.
+             *
+             * @note This is not implemented in an cpu efficient way...
+             *
+             * @param number   The number to calculate the modulus to and put the result in
+             * @param length   The length of the number
+             * @param N        The modulus to calculate by
+             * @param N_length The length of the modulus
+             */
             static void mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
+
+            static void modpow(const unsigned char base[], size_t base_length,
+                               const unsigned char exponent[], size_t exponent_length,
+                               const unsigned char N[], size_t N_length,
+                               unsigned char result[], size_t result_length);
+
+            static void modmul(unsigned char number[], size_t length,
+                               const unsigned char value[], size_t value_length,
+                               const unsigned char N[], size_t N_length);
         };
     }
 }

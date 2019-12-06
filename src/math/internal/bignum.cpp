@@ -182,3 +182,73 @@ void bignum::mod(unsigned char number[], size_t length, const unsigned char N[],
         subtract(number, length, N, N_length);
     }
 }
+
+void bignum::modpow(const unsigned char base[], size_t base_length,
+                    const unsigned char exponent[], size_t exponent_length,
+                    const unsigned char N[], size_t N_length,
+                    unsigned char result[], size_t result_length)
+{
+    unsigned char num_0[] = {0};
+    unsigned char num_1[] = {1};
+
+    auto _base = new unsigned char[base_length];
+    set(_base, base_length, base, base_length);
+
+    auto _exponent = new unsigned char[base_length];
+    auto _backup_exponent = _exponent;
+    auto _exponent_length = exponent_length;
+    set(_exponent, exponent_length, exponent, exponent_length);
+
+
+    if (compare(N, N_length, num_1, sizeof(num_1)))
+    {
+        set(result, result_length, num_0, sizeof(num_0));
+        return;
+    }
+
+    // Lets make sure that (N-1) * (N-1) does not overflow the 'result'
+    if (result_length < N_length * 2)
+    {
+        throw std::runtime_error(
+                "Not enough space in the result buffer. The buffer must be at least N_length * 2 bytes");
+    }
+
+    mod(_base, base_length, N, N_length);
+
+    while (compare(_exponent, _exponent_length, num_0, sizeof(num_0)) > 0)
+    {
+        //
+        // if exponent % 2 = 1
+        //
+        if (_exponent[_exponent_length - 1] % 0x01 == 0)
+        {
+            // modmul(result, result_length, _base, base_length, N, N_length);
+        }
+
+        // Exponent >>= 1
+        // shift_right(_exponent, _exponent_length, 1);
+        // modmul(_base, base_length, _base, base_length, N, N_length);
+    }
+}
+
+void bignum::modmul(unsigned char *number, size_t length,
+                    const unsigned char *value, size_t value_length,
+                    const unsigned char *N, size_t N_length)
+{
+    //
+    // So lets think of the following idea... lets say we want to calculate a*b % N.. so:
+    //
+    // Lets write some auxiliary equations:
+    //     - (i)  |  (a * b) % N = (a % N * b % N) % N = ((a / 2) % N) * ((b * 2) % N) % N
+    //     - (ii) |  (a % N)
+    //
+    //
+    //     (a * b) % N = (a % N * b % N) % N =
+    //
+    //      if a is even: ((a / 2) % N) * ((b * 2) % N) % N
+    //      if a is odd:
+    //
+    //
+    //
+    //
+}
