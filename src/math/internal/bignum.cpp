@@ -145,49 +145,40 @@ void bignum::set(unsigned char *number, size_t length, const unsigned char *valu
 
 int bignum::compare(const unsigned char *first, size_t first_length, const unsigned char *second, size_t second_length)
 {
-    auto bigger_length = std::max(first_length, second_length);
-    auto smaller_length = std::min(first_length, second_length);
+    if (first_length < second_length)
+    {
+        return compare(second, second_length, first, first_length) > 0 ? -1 : 1;
+    }
 
-    const unsigned char *bigger = (first_length > second_length) ? first : second;
-    const unsigned char *smaller = (first_length > second_length) ? second : first;
-
+    unsigned diff_length = first_length - second_length;
     int eq = 0;
 
-    for (auto i = 0; i < smaller_length; i++)
+    for (auto i = 0; i < diff_length; i++)
     {
-        if (bigger[bigger_length - i - 1] != smaller[smaller_length - i - 1])
+        if (first[i] != 0)
         {
-            if (eq == 0)
-            {
-                eq = bigger[bigger_length - i - 1] > smaller[smaller_length - i - 1] ? 1 : -1;
-            }
-            //
-            // Do not 'break' or 'return' here! this is done to prevent timing attacks
-            //
+            if (eq == 0) eq = 1;
         }
     }
 
-    for (auto i = smaller_length; i < bigger_length; i++)
+    first += diff_length;
+
+    for (auto i = 0; i < second_length; i++)
     {
-        if (bigger[bigger_length - i - 1] != 0)
+        if (eq == 0)
         {
-            eq = 1;
-            //
-            // Do not 'break' or 'return' here! this is done to prevent timing attacks
-            //
+            if (first[i] > second[i]) eq = 1;
+            else if (first[i] < second[i]) eq = -1;
         }
     }
 
-    if (eq == 1)
+    return eq;
+}
+
+void bignum::mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length)
+{
+    while (compare(number, length, N, N_length) >= 0)
     {
-        return (first_length > second_length) ? 1 : -1;
-    }
-    else if (eq == -1)
-    {
-        return (first_length > second_length) ? -1 : 1;
-    }
-    else
-    {
-        return 0;
+        subtract(number, length, N, N_length);
     }
 }

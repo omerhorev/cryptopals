@@ -30,6 +30,8 @@ namespace math
              *
              * The length of the number to add to must be bigger or equal to the length of the number added.
              *
+             * Done in O(n)
+             *
              * @param number The number to add to
              * @param length The length of the number to add to
              * @param value  The value to add to the number
@@ -40,6 +42,8 @@ namespace math
             /**
              * Subtracts a specific number from another
              *
+             * Done in O(n)
+             *
              * @param number The number to subtract from
              * @param length The length of the number to subtract from
              * @param value  The number to subtract from the number
@@ -48,7 +52,9 @@ namespace math
             static void subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length);
 
             /**
-             * Compares two number
+             * Compares two number.
+             *
+             * Done in O(max(n,m))
              *
              * @param first         The first number
              * @param first_length  The first number length
@@ -58,6 +64,8 @@ namespace math
              */
             static int compare(const unsigned char *first, size_t first_length,
                                const unsigned char *second, size_t second_length);
+
+            static void mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
         };
     }
 }

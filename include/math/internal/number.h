@@ -264,6 +264,21 @@ namespace math
                 return !operator<(value);
             }
 
+            number &operator%=(const number<BitSize> &rhs)
+            {
+                bignum::mod(_raw, bytes_count(), rhs._raw, rhs.bytes_count());
+
+                return *this;
+            }
+
+            number &operator%=(unsigned int rhs)
+            {
+                auto v = generate_be_uint_buffer(rhs);
+                bignum::mod(_raw, bytes_count(), v.data(), v.size());
+
+                return *this;
+            }
+
         private:
             template<class T>
             static auto generate_be_uint_buffer(T value)
@@ -364,6 +379,15 @@ namespace math
         bool operator>=(const T &lhs, const number<BitSize> &num)
         {
             return num <= lhs;
+        }
+
+        template<class T, size_t BitSize>
+        number<BitSize> operator%(const number<BitSize> &number, const T &N)
+        {
+            math::internal::number<BitSize> _ = number;
+            _ %= N;
+
+            return _;
         }
     }
 }
