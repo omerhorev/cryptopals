@@ -5,6 +5,7 @@
 #include <math/internal/bignum.h>
 #include <algorithm>
 #include <stdexcept>
+#include <utils/debug.h>
 
 using namespace math;
 using namespace math::internal;
@@ -93,10 +94,21 @@ void bignum::subtract(unsigned char *number, size_t length, const unsigned char 
      *     0100 - 1 = 00 - 01 = 100 - 00 - 1 = ff, 1-1 = 0 -> 00FF
      *
      */
+    auto l1 = minimum_required_length(number, length);
+    auto l2 = minimum_required_length(value, value_length);
 
-    if (length < value_length)
+    if (l1 != length || l2 != value_length)
     {
-        throw std::runtime_error("The left side's max value must be grater or equal to the right side's max value");
+        //
+        // This calculation can be simplified if we don't try to subtract the whole number if it's full of zeros
+        //
+        subtract(number + length - l1, l1, value + value_length - l2, l2);
+        return;
+    }
+
+    if (compare(number, length, value, value_length) < 0)
+    {
+        throw std::underflow_error("Result will be a negative number");
     }
 
     unsigned char carry = 0;
@@ -126,11 +138,6 @@ void bignum::subtract(unsigned char *number, size_t length, const unsigned char 
         unsigned int a = (0x100ul + *number) - carry;
         carry = (unsigned char) (a < 0x100 ? 1 : 0);
         *number = (unsigned char) (carry ? a : a - 0x100);
-    }
-
-    if (carry)
-    {
-        throw std::overflow_error("The result is to big to be held in the receivers side");
     }
 }
 
@@ -177,9 +184,24 @@ int bignum::compare(const unsigned char *first, size_t first_length, const unsig
 
 void bignum::mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length)
 {
-    while (compare(number, length, N, N_length) >= 0)
+    while (true)
     {
-        subtract(number, length, N, N_length);
+        size_t l = 0;
+
+        while (compare(number, l, N, N_length) < 0 && l <= length)
+        {
+            l++;
+        }
+
+        if (l > length)
+        {
+            break;
+        }
+
+        while (compare(number, l, N, N_length) >= 0)
+        {
+            subtract(number, l, N, N_length);
+        }
     }
 }
 
@@ -252,3 +274,13 @@ void bignum::modmul(unsigned char *number, size_t length,
     //
     //
 }
+
+
+size_t bignum::minimum_required_length(const unsigned char number[], size_t length)
+{
+    size_t l = 0;
+    while (*(number + l) == 0 && l != length) l++;
+
+    return length - l;
+}
+

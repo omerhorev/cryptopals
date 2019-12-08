@@ -30,6 +30,8 @@ namespace utils
         return a;
     }
 
+    void print_divider();
+
     void print_buffer(const unsigned char data[], size_t length);
 
     void print_buffer(const char* name, const unsigned char data[], size_t length);

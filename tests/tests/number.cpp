@@ -152,44 +152,68 @@ TEST(numbers, compare)
 
 TEST(numbers, modulus)
 {
-    unsigned int int_0001 = 0x0001;
-    unsigned int int_0002 = 0x0002;
-    unsigned int int_0003 = 0x0003;
-    unsigned int int_0005 = 0x0005;
-    unsigned int int_00ff = 0x00ff;
-    unsigned int int_10ff = 0x10ff;
+    unsigned int int_000001 = 0x000001;
+    unsigned int int_000002 = 0x000002;
+    unsigned int int_000003 = 0x000003;
+    unsigned int int_000005 = 0x000005;
+    unsigned int int_0000ff = 0x0000ff;
+    unsigned int int_0010ff = 0x0010ff;
+    unsigned int int_010000 = 0x010000;
+    unsigned int int_001000 = 0x001000;
+    unsigned int int_1fe891 = 0x1fe891;
+    unsigned int int_098765 = 0x098765;
 
-    math::num512_t num_0001 = int_0001;
-    math::num512_t num_0002 = int_0002;
-    math::num512_t num_0003 = int_0003;
-    math::num512_t num_0005 = int_0005;
-    math::num512_t num_00ff = int_00ff;
-    math::num512_t num_10ff = int_10ff;
+    math::num512_t num_000001 = int_000001;
+    math::num512_t num_000002 = int_000002;
+    math::num512_t num_000003 = int_000003;
+    math::num512_t num_000005 = int_000005;
+    math::num512_t num_0000ff = int_0000ff;
+    math::num512_t num_0010ff = int_0010ff;
+    math::num512_t num_010000 = int_010000;
+    math::num512_t num_001000 = int_001000;
+    math::num512_t num_1fe891 = int_1fe891;
+    math::num512_t num_098765 = int_098765;
 
-    ASSERT_EQ(num_00ff % int_0001, int_00ff % int_0001);
-    ASSERT_EQ(num_00ff % num_0001, int_00ff % int_0001);
+    ASSERT_EQ(num_0010ff % num_000003, int_0010ff % int_000003);
 
-    ASSERT_EQ(num_00ff % int_0002, int_00ff % int_0002);
-    ASSERT_EQ(num_00ff % num_0002, int_00ff % int_0002);
+    ASSERT_EQ(num_0000ff % int_000001, int_0000ff % int_000001);
+    ASSERT_EQ(num_0000ff % num_000001, int_0000ff % int_000001);
 
-    ASSERT_EQ(num_00ff % int_0003, int_00ff % int_0003);
-    ASSERT_EQ(num_00ff % num_0003, int_00ff % int_0003);
+    ASSERT_EQ(num_0000ff % int_000002, int_0000ff % int_000002);
+    ASSERT_EQ(num_0000ff % num_000002, int_0000ff % int_000002);
 
-    ASSERT_EQ(num_00ff % int_0005, int_00ff % int_0005);
-    ASSERT_EQ(num_00ff % num_0005, int_00ff % int_0005);
+    ASSERT_EQ(num_0000ff % int_000003, int_0000ff % int_000003);
+    ASSERT_EQ(num_0000ff % num_000003, int_0000ff % int_000003);
 
-    ASSERT_EQ(num_0003 % int_0003, int_0003 % int_0003);
-    ASSERT_EQ(num_0003 % num_0003, int_0003 % int_0003);
+    ASSERT_EQ(num_0000ff % int_000005, int_0000ff % int_000005);
+    ASSERT_EQ(num_0000ff % num_000005, int_0000ff % int_000005);
 
-    ASSERT_EQ(num_0002 % int_0003, int_0002 % int_0003);
-    ASSERT_EQ(num_0002 % num_0003, int_0002 % int_0003);
+    ASSERT_EQ(num_000003 % int_000003, int_000003 % int_000003);
+    ASSERT_EQ(num_000003 % num_000003, int_000003 % int_000003);
 
-    ASSERT_EQ(num_10ff % int_0003, int_10ff % int_0003);
-    ASSERT_EQ(num_10ff % num_0003, int_10ff % int_0003);
+    ASSERT_EQ(num_000002 % int_000003, int_000002 % int_000003);
+    ASSERT_EQ(num_000002 % num_000003, int_000002 % int_000003);
 
-    num_10ff %= num_0005;
-    ASSERT_EQ(num_10ff, int_10ff % int_0005);
+    ASSERT_EQ(num_0010ff % int_000003, int_0010ff % int_000003);
+    ASSERT_EQ(num_0010ff % num_000003, int_0010ff % int_000003);
 
-    num_00ff %= num_0005;
-    ASSERT_EQ(num_00ff, int_00ff % int_0005);
+    ASSERT_EQ(num_010000 % int_001000, int_010000 % int_001000);
+    ASSERT_EQ(num_010000 % num_001000, int_010000 % int_001000);
+
+    ASSERT_EQ(num_010000 % int_000003, int_010000 % int_000003);
+    ASSERT_EQ(num_010000 % num_000003, int_010000 % int_000003);
+
+    ASSERT_EQ(num_1fe891 % int_098765, int_1fe891 % int_098765);
+    ASSERT_EQ(num_1fe891 % num_098765, int_1fe891 % int_098765);
+
+    num_0010ff %= num_000005;
+    ASSERT_EQ(num_0010ff, int_0010ff % int_000005);
+
+    num_0000ff %= num_000005;
+    ASSERT_EQ(num_0000ff, int_0000ff % int_000005);
+
+    math::num32_t a = 0x01234567;
+    math::num32_t b = 201;
+
+    ASSERT_EQ(a % b, 0x01234567 % 201);
 }

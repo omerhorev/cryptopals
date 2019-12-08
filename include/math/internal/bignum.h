@@ -77,6 +77,11 @@ namespace math
              */
             static void mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
 
+            static void reminder(unsigned char number[], size_t length,
+                                 const unsigned char divisor[], size_t divisor_length,
+                                 unsigned char reminder[], size_t reminder_length);
+
+
             static void modpow(const unsigned char base[], size_t base_length,
                                const unsigned char exponent[], size_t exponent_length,
                                const unsigned char N[], size_t N_length,
@@ -85,6 +90,10 @@ namespace math
             static void modmul(unsigned char number[], size_t length,
                                const unsigned char value[], size_t value_length,
                                const unsigned char N[], size_t N_length);
+
+        private:
+
+            static size_t minimum_required_length(const unsigned char number[], size_t length);
         };
     }
 }
