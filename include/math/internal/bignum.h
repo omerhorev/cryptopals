@@ -77,10 +77,9 @@ namespace math
              */
             static void mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
 
-            static void reminder(unsigned char number[], size_t length,
-                                 const unsigned char divisor[], size_t divisor_length,
-                                 unsigned char reminder[], size_t reminder_length);
+            static void shift_left(unsigned char number[], size_t length, unsigned int count);
 
+            static void shift_right(unsigned char number[], size_t length, unsigned int count);
 
             static void modpow(const unsigned char base[], size_t base_length,
                                const unsigned char exponent[], size_t exponent_length,
@@ -91,7 +90,20 @@ namespace math
                                const unsigned char value[], size_t value_length,
                                const unsigned char N[], size_t N_length);
 
+            static bool is_odd(const unsigned char number[], size_t length);
+
+            static bool is_even(const unsigned char number[], size_t length);
+
+            static bool is_empty(const unsigned char number[], size_t length);
+
+            static void decrease(unsigned char number[], size_t length);
+
+            static void increase(unsigned char number[], size_t length);
+
         private:
+            static void modmul_internal(unsigned char a[], size_t a_length,
+                                        unsigned char b[], size_t b_length,
+                                        const unsigned char N[], size_t N_length);
 
             static size_t minimum_required_length(const unsigned char number[], size_t length);
         };

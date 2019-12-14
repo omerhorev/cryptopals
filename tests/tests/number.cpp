@@ -8,12 +8,14 @@
 
 TEST(numbers, comparison)
 {
+    math::num512_t zero = 0;
     math::num512_t a = 1;
     math::num512_t b = 2;
     math::num512_t c = 1;
     math::num512_t d = 0xffffff;
     math::num32_t e = 0xffffff0a;
 
+    ASSERT_EQ(zero, 0);
     ASSERT_FALSE(a == b);
     ASSERT_TRUE(c == a);
 
@@ -216,4 +218,68 @@ TEST(numbers, modulus)
     math::num32_t b = 201;
 
     ASSERT_EQ(a % b, 0x01234567 % 201);
+}
+
+TEST(numbers, shift)
+{
+    // math::num64_t a = 1;
+    // ASSERT_EQ(a << 1, 2);
+
+    for (int i = 0; i < 0x2FF; ++i)
+    {
+        for (int j = 0; j < 20; ++j)
+        {
+            long long int a1 = i;
+            math::num64_t a2 = i;
+
+            ASSERT_EQ(a1 << j, a2 << j) << "Calculation: " << i << " << " << j;
+        }
+    }
+
+    for (unsigned int i = 0xFFFFFFFF; i > 0xFFFFF000; --i)
+    {
+        for (int j = 0; j < 20; ++j)
+        {
+            auto a1 = i;
+            math::num64_t a2 = i;
+
+            ASSERT_EQ(a1 >> j, a2 >> j) << "Calculation: " << i << " >> " << j;
+        }
+    }
+}
+
+TEST(numbers, modmul)
+{
+    unsigned int numbers[] = {0x00000076, 0x00000044, 0x00000087, 0x00002345,
+                              0x00007754, 0x00003221, 0x00000002, 0x00000001,
+                              0x00000000, 0x00003345, 0x00000099, 0x00088475,
+                              0x01123453, 0x84874382, 0x84874383, 0x84874384,
+                              0x43834421, 0x11111111, 0x22222222, 0x33333333};
+
+    for (auto n1 : numbers)
+    {
+        for (auto n2 : numbers)
+        {
+            for (auto n3 : numbers)
+            {
+                math::num64_t num_a = n1;
+                math::num64_t num_b = n2;
+                math::num64_t num_N = n3;
+
+                unsigned long long int int_a = n1;
+                unsigned long long int int_b = n2;
+                unsigned long long int int_N = n3;
+
+                if (n3 == 0)
+                {
+                    continue;
+                }
+
+                num_a.apply_modular_multiplication(num_b, num_N);
+
+                ASSERT_EQ(num_a, (int_a * int_b) % int_N)
+                                            << "Calculation: " << "(" << n1 << " * " << n2 << ") % " << n3;
+            }
+        }
+    }
 }

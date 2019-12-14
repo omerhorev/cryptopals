@@ -279,6 +279,28 @@ namespace math
                 return *this;
             }
 
+            number &operator>>=(unsigned int count)
+            {
+                bignum::shift_right(_raw, bytes_count(), count);
+
+                return *this;
+            }
+
+            number &operator<<=(unsigned int count)
+            {
+                bignum::shift_left(_raw, bytes_count(), count);
+
+                return *this;
+            }
+
+            number &apply_modular_multiplication(number &multiplicand, number &modulus)
+            {
+                bignum::modmul(_raw, bytes_count(),
+                               multiplicand._raw, multiplicand.bytes_count(),
+                               modulus._raw, modulus.bytes_count());
+                return *this;
+            }
+
         private:
             template<class T>
             static auto generate_be_uint_buffer(T value)
@@ -388,6 +410,21 @@ namespace math
             _ %= N;
 
             return _;
+        }
+
+        template<unsigned int BitSize>
+        number<BitSize> operator>>(number<BitSize> lhs, unsigned int rhs)
+        {
+            lhs >>= rhs; // reuse compound assignment
+            return lhs; // return the result by value (uses move constructor)
+        }
+
+
+        template<unsigned int BitSize>
+        number<BitSize> operator<<(number<BitSize> lhs, unsigned int rhs)
+        {
+            lhs <<= rhs; // reuse compound assignment
+            return lhs; // return the result by value (uses move constructor)
         }
     }
 }

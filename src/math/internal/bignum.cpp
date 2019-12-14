@@ -221,7 +221,6 @@ void bignum::modpow(const unsigned char base[], size_t base_length,
     auto _exponent_length = exponent_length;
     set(_exponent, exponent_length, exponent, exponent_length);
 
-
     if (compare(N, N_length, num_1, sizeof(num_1)))
     {
         set(result, result_length, num_0, sizeof(num_0));
@@ -244,7 +243,7 @@ void bignum::modpow(const unsigned char base[], size_t base_length,
         //
         if (_exponent[_exponent_length - 1] % 0x01 == 0)
         {
-            // modmul(result, result_length, _base, base_length, N, N_length);
+            modmul(result, result_length, _base, base_length, N, N_length);
         }
 
         // Exponent >>= 1
@@ -257,22 +256,144 @@ void bignum::modmul(unsigned char *number, size_t length,
                     const unsigned char *value, size_t value_length,
                     const unsigned char *N, size_t N_length)
 {
+    if (is_empty(N, N_length))
+    {
+        throw std::logic_error("Can't calculate modulus 0");
+    }
+
+    if (is_empty(number, length) || is_empty(value, value_length))
+    {
+        std::fill_n(number, length, 0);
+        return;
+    }
+
+    auto v = new unsigned char[value_length];
+    std::copy_n(value, value_length, v);
+
+    modmul_internal(number, length, v, value_length, N, N_length);
+
+    delete[] v;
+}
+
+
+void bignum::modmul_internal(unsigned char *a, size_t a_length,
+                             unsigned char *b, size_t b_length,
+                             const unsigned char *N, size_t N_length)
+{
+    unsigned char one[] = {1};
+
+    if (compare(a, a_length, one, sizeof(one)) == 0)
+    {
+        set(a, a_length, b, b_length);
+        mod(a, a_length, N, N_length);
+        return;
+    }
+
+    if (is_odd(a, a_length))
+    {
+        //unsigned int temp = b;
+        auto *temp = new unsigned char[b_length];
+        set(temp, b_length, b, b_length);
+
+        decrease(a, a_length);
+
+        modmul_internal(a, a_length, b, b_length, N, N_length);
+        mod(a, a_length, N, N_length);
+        add(a, a_length, temp, b_length);
+        mod(a, a_length, N, N_length);
+    }
+    else
+    {
+        shift_right(a, a_length, 1);
+        shift_left(b, b_length, 1);
+        mod(b, b_length, N, N_length);
+        modmul_internal(a, a_length, b, b_length, N, N_length);
+        mod(a, a_length, N, N_length);
+    }
+}
+
+void bignum::shift_left(unsigned char number[], size_t length, unsigned int count)
+{
+    constexpr const unsigned char mask[] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f};
+    auto bits = count % CHAR_BIT;
+    auto bytes = count / CHAR_BIT;
+
     //
-    // So lets think of the following idea... lets say we want to calculate a*b % N.. so:
+    // Shift to left by multiples of 8 is shifting left bytes.
+    // For example:
     //
-    // Lets write some auxiliary equations:
-    //     - (i)  |  (a * b) % N = (a % N * b % N) % N = ((a / 2) % N) * ((b * 2) % N) % N
-    //     - (ii) |  (a % N)
+    //     [X0 X1 X2 X3 X4 X5 X6 X7] [X8 X9 Xa Xb Xc Xd Xe Xf] Shift one byte left is equals to:
+    //     [X8 X9 XA Xb Xc Xd Xe Xf] [0  0  0  0  0  0  0  0 ]
     //
+    //     and...
     //
-    //     (a * b) % N = (a % N * b % N) % N =
+    //     [X0 X1 X2 X3 X4 X5 X6 X7] [X8 X9 Xa Xb Xc Xd Xe Xf] Shift 8 bits left is equals to:
+    //     [X8 X9 XA Xb Xc Xd Xe Xf] [0  0  0  0  0  0  0  0 ]
     //
-    //      if a is even: ((a / 2) % N) * ((b * 2) % N) % N
-    //      if a is odd:
+    //     The same!
     //
+    for (auto i = 0; i < length - bytes; i++)
+    {
+        number[i] = number[i + bytes];
+    }
+
+    for (auto i = length - bytes; i < length; i++)
+    {
+        number[i] = 0;
+    }
+
     //
+    // We had to shift N bits and N = 8*bytes_count + bits_count.
+    // We already shifted 8*bytes_count when we shifted the bytes, all we have to do is shift the bits now!
     //
-    //
+    for (auto i = 0; i < length; i++)
+    {
+        number[i] <<= bits;
+
+        if (i + 1 < length)
+        {
+            number[i] |= ((number[i + 1] & ~mask[CHAR_BIT - bits - 1]) >> (CHAR_BIT - bits));
+        }
+    }
+}
+
+void bignum::shift_right(unsigned char number[], size_t length, unsigned int count)
+{
+    constexpr const unsigned char mask[] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f};
+    auto bits = count % CHAR_BIT;
+    auto bytes = count / CHAR_BIT;
+
+    if (bytes >= length)
+    {
+        std::fill_n(number, length, 0);
+        return;
+    }
+
+    for (int i = 0; i < length - bytes; ++i)
+    {
+        auto l = length - i - 1;
+        number[l] = number[l - bytes];
+    }
+
+    std::fill_n(number, bytes, 0);
+
+    for (int i = 0; i < length; ++i)
+    {
+        auto l = length - i - 1;
+
+        number[l] >>= bits;
+
+        if (l > 0)
+        {
+            number[l] |= (number[l - 1] & mask[bits]) << (CHAR_BIT - bits);
+        }
+    }
+}
+
+
+bool bignum::is_empty(const unsigned char *number, size_t length)
+{
+    return compare(number, length, nullptr, 0) == 0;
 }
 
 
@@ -284,3 +405,27 @@ size_t bignum::minimum_required_length(const unsigned char number[], size_t leng
     return length - l;
 }
 
+
+bool bignum::is_odd(const unsigned char *number, size_t length)
+{
+    return (number[length - 1] & 0x1) == 1;
+}
+
+bool bignum::is_even(const unsigned char *number, size_t length)
+{
+    return !is_odd(number, length);
+}
+
+void bignum::decrease(unsigned char *number, size_t length)
+{
+    unsigned char one[] = {1};
+
+    subtract(number, length, one, sizeof(one));
+}
+
+void bignum::increase(unsigned char *number, size_t length)
+{
+    unsigned char one[] = {1};
+
+    add(number, length, one, sizeof(one));
+}
