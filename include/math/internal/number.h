@@ -301,6 +301,15 @@ namespace math
                 return *this;
             }
 
+            number &apply_modular_power(number &power, number &modulus)
+            {
+                bignum::modpow(_raw, bytes_count(),
+                               power._raw, power.bytes_count(),
+                               modulus._raw, modulus.bytes_count());
+
+                return *this;
+            }
+
         private:
             template<class T>
             static auto generate_be_uint_buffer(T value)

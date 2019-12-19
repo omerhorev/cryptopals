@@ -81,14 +81,20 @@ namespace math
 
             static void shift_right(unsigned char number[], size_t length, unsigned int count);
 
-            static void modpow(const unsigned char base[], size_t base_length,
+            static void modpow(unsigned char number[], size_t number_length,
                                const unsigned char exponent[], size_t exponent_length,
+                               const unsigned char N[], size_t N_length);
+
+            static void modpow(unsigned char base[], size_t base_length,
+                               unsigned char exponent[], size_t exponent_length,
                                const unsigned char N[], size_t N_length,
                                unsigned char result[], size_t result_length);
 
             static void modmul(unsigned char number[], size_t length,
                                const unsigned char value[], size_t value_length,
                                const unsigned char N[], size_t N_length);
+
+            static void modsquare(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
 
             static bool is_odd(const unsigned char number[], size_t length);
 

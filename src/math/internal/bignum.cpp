@@ -205,8 +205,40 @@ void bignum::mod(unsigned char number[], size_t length, const unsigned char N[],
     }
 }
 
-void bignum::modpow(const unsigned char base[], size_t base_length,
+void bignum::modpow(unsigned char number[], size_t number_length,
                     const unsigned char exponent[], size_t exponent_length,
+                    const unsigned char *N, size_t N_length)
+{
+    auto result_length = number_length;
+    auto result = new unsigned char[result_length];
+
+    auto temp_number_length = number_length;
+    auto temp_number = new unsigned char[temp_number_length];
+
+    auto temp_exponent_length = exponent_length;
+    auto temp_exponent = new unsigned char[temp_exponent_length];
+
+    set(temp_number, temp_number_length, number, number_length);
+    set(temp_exponent, temp_exponent_length, exponent, exponent_length);
+
+    try
+    {
+        modpow(temp_number, temp_number_length, temp_exponent, temp_exponent_length, N, N_length, result,
+               result_length);
+    }
+    catch (std::exception &e)
+    {
+        delete[] result;
+        throw e;
+    }
+
+    std::copy_n(result, number_length, number);
+
+    delete[] result;
+}
+
+void bignum::modpow(unsigned char base[], size_t base_length,
+                    unsigned char exponent[], size_t exponent_length,
                     const unsigned char N[], size_t N_length,
                     unsigned char result[], size_t result_length)
 {
@@ -217,40 +249,54 @@ void bignum::modpow(const unsigned char base[], size_t base_length,
     set(_base, base_length, base, base_length);
 
     auto _exponent = new unsigned char[base_length];
-    auto _backup_exponent = _exponent;
     auto _exponent_length = exponent_length;
     set(_exponent, exponent_length, exponent, exponent_length);
 
-    if (compare(N, N_length, num_1, sizeof(num_1)))
+    if (compare(N, N_length, num_1, sizeof(num_1)) == 0)
     {
         set(result, result_length, num_0, sizeof(num_0));
         return;
     }
 
-    // Lets make sure that (N-1) * (N-1) does not overflow the 'result'
-    if (result_length < N_length * 2)
-    {
-        throw std::runtime_error(
-                "Not enough space in the result buffer. The buffer must be at least N_length * 2 bytes");
-    }
+    utils::print_buffer("base", base, base_length);
+    utils::print_buffer("exponent", exponent, exponent_length);
+    utils::print_buffer("N", N, N_length);
 
-    mod(_base, base_length, N, N_length);
+    mod(base, base_length, N, N_length);
+    utils::print_buffer("base %= N", base, base_length);
 
-    while (compare(_exponent, _exponent_length, num_0, sizeof(num_0)) > 0)
+    set(result, result_length, num_1, sizeof(num_1));
+    utils::print_buffer("result", result, result_length);
+
+    while (!is_empty(exponent, exponent_length))
     {
-        //
-        // if exponent % 2 = 1
-        //
-        if (_exponent[_exponent_length - 1] % 0x01 == 0)
+        std::cout << "---------------------" << std::endl;
+        utils::print_buffer("exponent", exponent, exponent_length);
+
+        if (is_odd(exponent, exponent_length))
         {
-            modmul(result, result_length, _base, base_length, N, N_length);
+            std::cout << "result is odd, result = (result * base) % N" << std::endl;
+
+            utils::print_buffer("result before", result, result_length);
+            utils::print_buffer("base", base, base_length);
+            //result = (result * base) % modulus;
+            modmul(result, result_length, base, base_length, N, N_length);
+
+            utils::print_buffer("result after", result, result_length);
         }
 
-        // Exponent >>= 1
-        // shift_right(_exponent, _exponent_length, 1);
-        // modmul(_base, base_length, _base, base_length, N, N_length);
+        utils::print_buffer("base before", base, base_length);
+        modsquare(base, base_length, N, N_length);
+        utils::print_buffer("base after", base, base_length);
+
+        utils::print_buffer("exponent before", exponent, exponent_length);
+        shift_right(exponent, exponent_length, 1);
+        utils::print_buffer("exponent after", exponent, exponent_length);
     }
+
+    utils::print_buffer("result", result, result_length);
 }
+
 
 void bignum::modmul(unsigned char *number, size_t length,
                     const unsigned char *value, size_t value_length,
@@ -274,7 +320,6 @@ void bignum::modmul(unsigned char *number, size_t length,
 
     delete[] v;
 }
-
 
 void bignum::modmul_internal(unsigned char *a, size_t a_length,
                              unsigned char *b, size_t b_length,
@@ -311,6 +356,7 @@ void bignum::modmul_internal(unsigned char *a, size_t a_length,
         mod(a, a_length, N, N_length);
     }
 }
+
 
 void bignum::shift_left(unsigned char number[], size_t length, unsigned int count)
 {
@@ -357,6 +403,7 @@ void bignum::shift_left(unsigned char number[], size_t length, unsigned int coun
     }
 }
 
+
 void bignum::shift_right(unsigned char number[], size_t length, unsigned int count)
 {
     constexpr const unsigned char mask[] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f};
@@ -396,7 +443,6 @@ bool bignum::is_empty(const unsigned char *number, size_t length)
     return compare(number, length, nullptr, 0) == 0;
 }
 
-
 size_t bignum::minimum_required_length(const unsigned char number[], size_t length)
 {
     size_t l = 0;
@@ -404,7 +450,6 @@ size_t bignum::minimum_required_length(const unsigned char number[], size_t leng
 
     return length - l;
 }
-
 
 bool bignum::is_odd(const unsigned char *number, size_t length)
 {
@@ -428,4 +473,15 @@ void bignum::increase(unsigned char *number, size_t length)
     unsigned char one[] = {1};
 
     add(number, length, one, sizeof(one));
+}
+
+void bignum::modsquare(unsigned char *number, size_t length, const unsigned char *N, size_t N_length)
+{
+    auto l = length;
+    auto _ = new unsigned char[l];
+    set(_, l, number, length);
+
+    modmul(number, length, _, l, N, N_length);
+
+    delete[] _;
 }

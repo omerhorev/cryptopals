@@ -283,3 +283,43 @@ TEST(numbers, modmul)
         }
     }
 }
+
+uint64_t modpow(uint32_t a, uint32_t b, uint32_t N)
+{
+    uint64_t _ = 1;
+    for (int i = 0; i < b; ++i)
+    {
+        _ *= a;
+        _ %= N;
+    }
+
+    return _ % N;
+}
+
+TEST(numbers, modpow)
+{
+    uint32_t numbers[] = {
+            59, 61, 67, 3, 7, 1, 2
+    };
+
+    modpow(2, 3, 3);
+
+    for (auto a32 : numbers)
+    {
+        for (auto b32 : numbers)
+        {
+            for (auto N32 : numbers)
+            {
+                math::num64_t num_a = a32;
+                math::num64_t num_b = b32;
+                math::num64_t num_N = N32;
+
+                uint64_t result64 = modpow(a32, b32, N32);
+                num_a.apply_modular_power(num_b, num_N);
+
+                ASSERT_EQ(num_a, result64) << "Calculation: (" << a32 << " ** " << b32 << ") % " << N32;
+            }
+        }
+    }
+
+}
