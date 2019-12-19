@@ -5,10 +5,11 @@
 #include <math/internal/bignum.h>
 #include <algorithm>
 #include <stdexcept>
-#include <utils/debug.h>
+#include "utils/tempbuf.h"
 
 using namespace math;
 using namespace math::internal;
+using namespace utils;
 
 void bignum::add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
@@ -209,32 +210,16 @@ void bignum::modpow(unsigned char number[], size_t number_length,
                     const unsigned char exponent[], size_t exponent_length,
                     const unsigned char *N, size_t N_length)
 {
-    auto result_length = number_length;
-    auto result = new unsigned char[result_length];
+    auto temp_result = tempbuf::create(number_length);
+    auto temp_base = tempbuf::copy(number, number_length);
+    auto temp_exponent = tempbuf::copy(exponent, exponent_length);
 
-    auto temp_number_length = number_length;
-    auto temp_number = new unsigned char[temp_number_length];
+    modpow(temp_base.data, temp_base.length,
+           temp_exponent.data, temp_exponent.length,
+           N, N_length,
+           temp_result.data, temp_result.length);
 
-    auto temp_exponent_length = exponent_length;
-    auto temp_exponent = new unsigned char[temp_exponent_length];
-
-    set(temp_number, temp_number_length, number, number_length);
-    set(temp_exponent, temp_exponent_length, exponent, exponent_length);
-
-    try
-    {
-        modpow(temp_number, temp_number_length, temp_exponent, temp_exponent_length, N, N_length, result,
-               result_length);
-    }
-    catch (std::exception &e)
-    {
-        delete[] result;
-        throw e;
-    }
-
-    std::copy_n(result, number_length, number);
-
-    delete[] result;
+    std::copy_n(temp_result.data, number_length, number);
 }
 
 void bignum::modpow(unsigned char base[], size_t base_length,
@@ -245,56 +230,28 @@ void bignum::modpow(unsigned char base[], size_t base_length,
     unsigned char num_0[] = {0};
     unsigned char num_1[] = {1};
 
-    auto _base = new unsigned char[base_length];
-    set(_base, base_length, base, base_length);
-
-    auto _exponent = new unsigned char[base_length];
-    auto _exponent_length = exponent_length;
-    set(_exponent, exponent_length, exponent, exponent_length);
-
     if (compare(N, N_length, num_1, sizeof(num_1)) == 0)
     {
         set(result, result_length, num_0, sizeof(num_0));
         return;
     }
 
-    utils::print_buffer("base", base, base_length);
-    utils::print_buffer("exponent", exponent, exponent_length);
-    utils::print_buffer("N", N, N_length);
-
     mod(base, base_length, N, N_length);
-    utils::print_buffer("base %= N", base, base_length);
 
     set(result, result_length, num_1, sizeof(num_1));
-    utils::print_buffer("result", result, result_length);
 
     while (!is_empty(exponent, exponent_length))
     {
-        std::cout << "---------------------" << std::endl;
-        utils::print_buffer("exponent", exponent, exponent_length);
-
         if (is_odd(exponent, exponent_length))
         {
-            std::cout << "result is odd, result = (result * base) % N" << std::endl;
-
-            utils::print_buffer("result before", result, result_length);
-            utils::print_buffer("base", base, base_length);
             //result = (result * base) % modulus;
             modmul(result, result_length, base, base_length, N, N_length);
 
-            utils::print_buffer("result after", result, result_length);
         }
 
-        utils::print_buffer("base before", base, base_length);
         modsquare(base, base_length, N, N_length);
-        utils::print_buffer("base after", base, base_length);
-
-        utils::print_buffer("exponent before", exponent, exponent_length);
         shift_right(exponent, exponent_length, 1);
-        utils::print_buffer("exponent after", exponent, exponent_length);
     }
-
-    utils::print_buffer("result", result, result_length);
 }
 
 
@@ -313,12 +270,10 @@ void bignum::modmul(unsigned char *number, size_t length,
         return;
     }
 
-    auto v = new unsigned char[value_length];
-    std::copy_n(value, value_length, v);
+    auto v = tempbuf::copy(value, value_length);
 
-    modmul_internal(number, length, v, value_length, N, N_length);
+    modmul_internal(number, length, v.data, v.length, N, N_length);
 
-    delete[] v;
 }
 
 void bignum::modmul_internal(unsigned char *a, size_t a_length,
@@ -336,15 +291,13 @@ void bignum::modmul_internal(unsigned char *a, size_t a_length,
 
     if (is_odd(a, a_length))
     {
-        //unsigned int temp = b;
-        auto *temp = new unsigned char[b_length];
-        set(temp, b_length, b, b_length);
+        auto temp = tempbuf::copy(b, b_length);
 
         decrease(a, a_length);
 
         modmul_internal(a, a_length, b, b_length, N, N_length);
         mod(a, a_length, N, N_length);
-        add(a, a_length, temp, b_length);
+        add(a, a_length, temp.data, temp.length);
         mod(a, a_length, N, N_length);
     }
     else
@@ -477,11 +430,7 @@ void bignum::increase(unsigned char *number, size_t length)
 
 void bignum::modsquare(unsigned char *number, size_t length, const unsigned char *N, size_t N_length)
 {
-    auto l = length;
-    auto _ = new unsigned char[l];
-    set(_, l, number, length);
+    auto _ = tempbuf::copy(number, length);
 
-    modmul(number, length, _, l, N, N_length);
-
-    delete[] _;
+    modmul(number, length, _.data, _.length, N, N_length);
 }
