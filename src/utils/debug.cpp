@@ -13,10 +13,30 @@ void utils::print_buffer(const unsigned char *data, size_t length)
 
     string[length * 2] = 0;
 
-    std::cout << string << " (" << length << "b)" << std::endl;
+    std::cout << string << " (" << length << " bytes)" << std::endl;
 
     delete[] string;
 }
+
+void utils::print_buffer_bits(const unsigned char *data, size_t length)
+{
+    const char *nible[] = {
+            "0000", "0001", "0010", "0011",
+            "0100", "0101", "0110", "0111",
+            "1000", "1001", "1010", "1011",
+            "1100", "1101", "1110", "1111"
+    };
+
+    for (auto i = 0; i < length; ++i)
+    {
+        std::cout << nible[(data[i] & 0xf0) >> 4];
+        std::cout << nible[(data[i] & 0x0f) >> 0];
+        std::cout << " ";
+    }
+
+    std::cout << "(" << length << " bytes)" << std::endl;
+}
+
 
 void utils::print_buffer(const char *name, const unsigned char *data, size_t length)
 {
@@ -24,6 +44,14 @@ void utils::print_buffer(const char *name, const unsigned char *data, size_t len
 
     print_buffer(data, length);
 }
+
+void utils::print_buffer_bits(const char *name, const unsigned char *data, size_t length)
+{
+    std::cout << name << ": ";
+
+    print_buffer_bits(data, length);
+}
+
 
 void utils::print_blocked_buffer(const char *name, const unsigned char data[], size_t length, size_t block_size)
 {
@@ -49,6 +77,6 @@ void utils::print_blocked_buffer(const unsigned char data[], size_t length, size
         }
     }
 
-    std::cout << " (" << length << "b)" << std::endl;
+    std::cout << " (" << length << " bytes)" << std::endl;
     delete[] string;
 }
