@@ -5,7 +5,9 @@
 #include <math/internal/bignum.h>
 #include <algorithm>
 #include <stdexcept>
+#include <utils/hex.h>
 #include "utils/tempbuf.h"
+#include <iostream>
 
 using namespace math;
 using namespace math::internal;
@@ -73,6 +75,24 @@ void bignum::add(unsigned char *number, size_t length, const unsigned char *valu
         throw std::overflow_error("The result is to big to be held in the receivers side");
     }
 }
+
+void
+bignum::modadd(unsigned char *number, size_t length,
+               const unsigned char *value, size_t value_length,
+               const unsigned char *N, size_t N_length)
+{
+    auto temp_value = tempbuf::create(value_length + 1);
+    set(temp_value.data, temp_value.length, value, value_length);
+
+    auto temp_number = tempbuf::create(length + 1);
+    set(temp_number.data, temp_number.length, number, length);
+
+    add(temp_number.data, temp_number.length, temp_value.data, temp_value.length);
+    mod(temp_number.data, temp_number.length, N, N_length);
+
+    set(number, length, temp_number.data + 1, length);
+}
+
 
 void bignum::subtract(unsigned char *number, size_t length, const unsigned char *value, size_t value_length)
 {
@@ -159,13 +179,12 @@ int bignum::compare(const unsigned char *first, size_t first_length, const unsig
     }
 
     unsigned diff_length = first_length - second_length;
-    int eq = 0;
 
     for (auto i = 0; i < diff_length; i++)
     {
         if (first[i] != 0)
         {
-            if (eq == 0) eq = 1;
+            return 1;
         }
     }
 
@@ -173,14 +192,11 @@ int bignum::compare(const unsigned char *first, size_t first_length, const unsig
 
     for (auto i = 0; i < second_length; i++)
     {
-        if (eq == 0)
-        {
-            if (first[i] > second[i]) eq = 1;
-            else if (first[i] < second[i]) eq = -1;
-        }
+        if (first[i] > second[i]) return 1;
+        else if (first[i] < second[i]) return -1;
     }
 
-    return eq;
+    return 0;
 }
 
 void bignum::mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length)
@@ -245,11 +261,11 @@ void bignum::modpow(unsigned char base[], size_t base_length,
         if (is_odd(exponent, exponent_length))
         {
             //result = (result * base) % modulus;
-            modmul(result, result_length, base, base_length, N, N_length);
+            modmul_unsafe(result, result_length, base, base_length, N, N_length);
 
         }
 
-        modsquare(base, base_length, N, N_length);
+        modsquare_unsafe(base, base_length, N, N_length);
         shift_right(exponent, exponent_length, 1);
     }
 }
@@ -259,6 +275,7 @@ void bignum::modmul(unsigned char *number, size_t length,
                     const unsigned char *value, size_t value_length,
                     const unsigned char *N, size_t N_length)
 {
+    std::cout << "modmul" << std::endl;
     if (is_empty(N, N_length))
     {
         throw std::logic_error("Can't calculate modulus 0");
@@ -270,11 +287,16 @@ void bignum::modmul(unsigned char *number, size_t length,
         return;
     }
 
-    auto v = tempbuf::copy(value, value_length);
-
-    modmul_internal(number, length, v.data, v.length, N, N_length);
-
+    modmul_unsafe(number, length, value, value_length, N, N_length);
 }
+
+void bignum::modmul_unsafe(unsigned char *number, size_t length, const unsigned char *value, size_t value_length,
+                           const unsigned char *N, size_t N_length)
+{
+    auto v = tempbuf::copy(value, value_length);
+    modmul_internal(number, length, v.data, v.length, N, N_length);
+}
+
 
 void bignum::modmul_internal(unsigned char *a, size_t a_length,
                              unsigned char *b, size_t b_length,
@@ -296,20 +318,15 @@ void bignum::modmul_internal(unsigned char *a, size_t a_length,
         decrease(a, a_length);
 
         modmul_internal(a, a_length, b, b_length, N, N_length);
-        mod(a, a_length, N, N_length);
-        add(a, a_length, temp.data, temp.length);
-        mod(a, a_length, N, N_length);
+        modadd(a, a_length, temp.data, temp.length, N, N_length);
     }
     else
     {
         shift_right(a, a_length, 1);
-        shift_left(b, b_length, 1);
-        mod(b, b_length, N, N_length);
+        modadd(b, b_length, b, b_length, N, N_length);
         modmul_internal(a, a_length, b, b_length, N, N_length);
-        mod(a, a_length, N, N_length);
     }
 }
-
 
 void bignum::shift_left(unsigned char number[], size_t length, unsigned int count)
 {
@@ -390,7 +407,6 @@ void bignum::shift_right(unsigned char number[], size_t length, unsigned int cou
     }
 }
 
-
 bool bignum::is_empty(const unsigned char *number, size_t length)
 {
     return compare(number, length, nullptr, 0) == 0;
@@ -428,9 +444,19 @@ void bignum::increase(unsigned char *number, size_t length)
     add(number, length, one, sizeof(one));
 }
 
-void bignum::modsquare(unsigned char *number, size_t length, const unsigned char *N, size_t N_length)
+void bignum::modsquare_unsafe(unsigned char *number, size_t length, const unsigned char *N, size_t N_length)
 {
     auto _ = tempbuf::copy(number, length);
 
-    modmul(number, length, _.data, _.length, N, N_length);
+    modmul_unsafe(number, length, _.data, _.length, N, N_length);
+}
+
+std::ostream &bignum::stream_out(std::ostream &s, const unsigned char *number, size_t length)
+{
+    auto a = tempbuf::create(length * 2 + 1);
+    utils::hex::encode(number, length, (char *) a.data, a.length);
+
+    s << a.data << "(" << length * 8 << "b)";
+
+    return s;
 }

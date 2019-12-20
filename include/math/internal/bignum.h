@@ -6,12 +6,16 @@
 #define CRYPTOPALS_Z_H
 
 #include <cstddef>
+#include <iosfwd>
 
 namespace math
 {
     namespace internal
     {
-
+        /**
+         * This class holds operations that can be done on big numbers including some of the modular arithmetic.
+         * The implementations here are far from being optimal, but are safe and better than the trivial ones.
+         */
         class bignum
         {
         public:
@@ -38,6 +42,20 @@ namespace math
              * @param value_length The length of the number to add to the number
              */
             static void add(unsigned char *number, size_t length, const unsigned char *value, size_t value_length);
+
+            /**
+             * Adds a number to another modulus N
+             *
+             * @param number The number to add to
+             * @param length The length of the number
+             * @param value  The number to add
+             * @param value_length The length of the number to add
+             * @param N The modulus
+             * @param N_length The length of the modulus
+             */
+            static void modadd(unsigned char *number, size_t length,
+                               const unsigned char *value, size_t value_length,
+                               const unsigned char *N, size_t N_length);
 
             /**
              * Subtracts a specific number from another
@@ -77,14 +95,52 @@ namespace math
              */
             static void mod(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
 
+            /**
+             * Performs shift left on the number
+             *
+             * @param number The number to shift
+             * @param length The length of the number to shift
+             * @param count  The number of bits to shift to the left
+             */
             static void shift_left(unsigned char number[], size_t length, unsigned int count);
 
+
+            /**
+             * Performs shift right on the number
+             *
+             * @param number The number to shift
+             * @param length The length of the number to shift
+             * @param count  The number of bits to shift to the right
+             */
             static void shift_right(unsigned char number[], size_t length, unsigned int count);
 
+            /**
+             * Modular power. Calculates the 'number' raise to the power of 'exponent' modulus 'N' and puts it in the
+             * 'number' var.
+             *
+             * @param number           The number to raise
+             * @param number_length    The length of the number
+             * @param exponent         The exponent to raise to
+             * @param exponent_length  The length of the exponent
+             * @param N                The modulus
+             * @param N_length         The length of the modulus
+             */
             static void modpow(unsigned char number[], size_t number_length,
                                const unsigned char exponent[], size_t exponent_length,
                                const unsigned char N[], size_t N_length);
 
+            /**
+             * Modular power. Calculates the 'number' raise to the power of 'exponent' modulus 'N'.
+             *
+             * @param number           The number to raise
+             * @param number_length    The length of the number
+             * @param exponent         The exponent to raise to
+             * @param exponent_length  The length of the exponent
+             * @param N                The modulus
+             * @param N_length         The length of the modulus
+             * @param result           The result
+             * @param result_length    The length of the result
+             */
             static void modpow(unsigned char base[], size_t base_length,
                                unsigned char exponent[], size_t exponent_length,
                                const unsigned char N[], size_t N_length,
@@ -94,7 +150,8 @@ namespace math
                                const unsigned char value[], size_t value_length,
                                const unsigned char N[], size_t N_length);
 
-            static void modsquare(unsigned char number[], size_t length, const unsigned char N[], size_t N_length);
+            static void modsquare_unsafe(unsigned char number[], size_t length, const unsigned char N[],
+                                         size_t N_length);
 
             static bool is_odd(const unsigned char number[], size_t length);
 
@@ -106,7 +163,18 @@ namespace math
 
             static void increase(unsigned char number[], size_t length);
 
+            static std::ostream &stream_out(std::ostream &ostream, const unsigned char number[], size_t length);
+
         private:
+
+            /**
+             * Unsafe version of the modmul without the checks, used for internal needs only
+             */
+            static void modmul_unsafe(unsigned char number[], size_t length,
+                                      const unsigned char value[], size_t value_length,
+                                      const unsigned char N[], size_t N_length);
+
+
             static void modmul_internal(unsigned char a[], size_t a_length,
                                         unsigned char b[], size_t b_length,
                                         const unsigned char N[], size_t N_length);

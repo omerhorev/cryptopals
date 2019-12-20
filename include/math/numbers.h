@@ -10,6 +10,11 @@
 
 namespace math
 {
+    template<size_t Bits>
+    using num_t = internal::number<Bits>;
+
+    using num8_t = internal::number<8>;
+    using num16_t = internal::number<16>;
     using num32_t = internal::number<32>;
     using num64_t = internal::number<64>;
     using num128_t = internal::number<128>;

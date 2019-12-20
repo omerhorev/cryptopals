@@ -254,7 +254,7 @@ TEST(numbers, modmul)
                               0x00007754, 0x00003221, 0x00000002, 0x00000001,
                               0x00000000, 0x00003345, 0x00000099, 0x00088475,
                               0x01123453, 0x84874382, 0x84874383, 0x84874384,
-                              0x43834421, 0x11111111, 0x22222222, 0x33333333};
+                              0x43834421, 0x11111111, 0xf2222222, 0xf3333333};
 
     for (auto n1 : numbers)
     {
@@ -284,7 +284,7 @@ TEST(numbers, modmul)
     }
 }
 
-uint64_t modpow(uint32_t a, uint32_t b, uint32_t N)
+static uint64_t modpow(uint32_t a, uint32_t b, uint32_t N)
 {
     uint64_t _ = 1;
     for (int i = 0; i < b; ++i)
@@ -321,5 +321,4 @@ TEST(numbers, modpow)
             }
         }
     }
-
 }

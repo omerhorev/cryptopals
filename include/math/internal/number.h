@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <limits>
 #include <model/internal/utils.h>
+#include <utils/hex.h>
 #include "bignum.h"
 
 namespace math
@@ -40,6 +41,11 @@ namespace math
                 auto v = generate_be_uint_buffer(value);
 
                 bignum::set(_raw, bytes_count(), v.data(), v.size());
+            }
+
+            number(const unsigned char (&data)[BytesCount])
+            {
+                bignum::set(_raw, bytes_count(), data, BytesCount);
             }
 
             /**
@@ -308,6 +314,11 @@ namespace math
                                modulus._raw, modulus.bytes_count());
 
                 return *this;
+            }
+
+            friend std::ostream &operator<<(std::ostream &os, const number &num)
+            {
+                return bignum::stream_out(os, num._raw, num.bytes_count());
             }
 
         private:
