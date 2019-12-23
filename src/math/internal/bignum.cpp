@@ -5,9 +5,9 @@
 #include <math/internal/bignum.h>
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 #include <utils/hex.h>
 #include "utils/tempbuf.h"
-#include <iostream>
 
 using namespace math;
 using namespace math::internal;
@@ -81,16 +81,8 @@ bignum::modadd(unsigned char *number, size_t length,
                const unsigned char *value, size_t value_length,
                const unsigned char *N, size_t N_length)
 {
-    auto temp_value = tempbuf::create(value_length + 1);
-    set(temp_value.data, temp_value.length, value, value_length);
-
-    auto temp_number = tempbuf::create(length + 1);
-    set(temp_number.data, temp_number.length, number, length);
-
-    add(temp_number.data, temp_number.length, temp_value.data, temp_value.length);
-    mod(temp_number.data, temp_number.length, N, N_length);
-
-    set(number, length, temp_number.data + 1, length);
+    add(number, length, value, value_length);
+    mod(number, length, N, N_length);
 }
 
 
@@ -246,6 +238,18 @@ void bignum::modpow(unsigned char base[], size_t base_length,
     unsigned char num_0[] = {0};
     unsigned char num_1[] = {1};
 
+    if (N[0] & 0x80)
+    { throw std::runtime_error("Modulus with msb bit on is unsupported, please choose a smaller modulus"); }
+
+    if (is_empty(N, N_length))
+    { throw std::logic_error("Can't calculate modulus 0"); }
+
+    if (is_empty(base, base_length))
+    {
+        std::fill_n(result, result_length, 0);
+        return;
+    }
+
     if (compare(N, N_length, num_1, sizeof(num_1)) == 0)
     {
         set(result, result_length, num_0, sizeof(num_0));
@@ -253,6 +257,12 @@ void bignum::modpow(unsigned char base[], size_t base_length,
     }
 
     mod(base, base_length, N, N_length);
+
+    if (is_empty(base, base_length))
+    {
+        set(result, result_length, num_0, sizeof(num_0));
+        return;
+    }
 
     set(result, result_length, num_1, sizeof(num_1));
 
@@ -275,10 +285,21 @@ void bignum::modmul(unsigned char *number, size_t length,
                     const unsigned char *value, size_t value_length,
                     const unsigned char *N, size_t N_length)
 {
-    std::cout << "modmul" << std::endl;
+    unsigned char num_0 = 0;
+    unsigned char num_1 = 1;
+
+    if (N[0] & 0x80)
+    { throw std::runtime_error("Modulus with msb bit on is unsupported, please choose a smaller modulus"); }
+
     if (is_empty(N, N_length))
     {
         throw std::logic_error("Can't calculate modulus 0");
+    }
+
+    if (compare(N, N_length, &num_1, sizeof(num_1)) == 0)
+    {
+        set(number, length, &num_0, sizeof(num_0));
+        return;
     }
 
     if (is_empty(number, length) || is_empty(value, value_length))

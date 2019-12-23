@@ -60,7 +60,7 @@ namespace model
              */
             num_t generate_session_key(const num_t &other_public)
             {
-                num_t _ = _g;
+                num_t _ = other_public;
                 _.apply_modular_power(_private_key, _p);
 
                 return _;

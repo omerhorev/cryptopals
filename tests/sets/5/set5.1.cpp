@@ -6,6 +6,7 @@
 #include <math/numbers.h>
 #include <model/diffie-hellman.h>
 #include <utils/random.h>
+#include <utils/debug.h>
 
 using namespace math;
 
@@ -43,7 +44,7 @@ TEST(set_5_1, math_big1)
 {
     using num = math::num32_t;
     num g = 5;
-    num p = 0xffffffff;
+    num p = 0x7fffffff;
 
     // -----  Alice -----
     num a = 123;
@@ -73,7 +74,7 @@ TEST(set_5_1, math_big2)
     num g = 2;
     num p;
 
-    const char *str_p = "fca682ce8e12caba26efccf7110e526db078b05edecbcd1eb4a208f3ae1617ae01f35b91a47e6df63413c5e12ed0899bcd132acd50d99151bdc43ee737592e17";
+    const char *str_p = "7ca682ce8e12caba26efccf7110e526db078b05edecbcd1eb4a208f3ae1617ae01f35b91a47e6df63413c5e12ed0899bcd132acd50d99151bdc43ee737592e17";
     auto str_p_len = strlen(str_p);
     utils::hex::decode(str_p, str_p_len, (unsigned char *) &p, sizeof(p));
 
@@ -99,28 +100,55 @@ TEST(set_5_1, math_big2)
     ASSERT_EQ(s1, s2);
 }
 
+TEST(set_5_1, internal)
+{
+    using dh_t = model::internal::diffie_hellman<512>;
+
+    dh_t alice_model(7, 8);
+    dh_t bob_model(7, 8);
+
+    auto a = 90;
+    auto b = 91;
+
+    alice_model.seed(a);
+    bob_model.seed(b);
+
+    auto A = alice_model.generate_public_key();
+    auto B = bob_model.generate_public_key();
+
+    auto s1 = alice_model.generate_session_key(B);
+    auto s2 = bob_model.generate_session_key(A);
+
+    ASSERT_EQ(s1, s2);
+}
+
 TEST(set_5_1, run)
 {
     using dh_t = model::diffie_hellman<512>;
+    std::array<unsigned char, 64> a{};
+    std::array<unsigned char, 64> b{};
+    std::array<unsigned char, 64> A{};
+    std::array<unsigned char, 64> B{};
+    std::array<unsigned char, 64> S1{};
+    std::array<unsigned char, 64> S2{};
 
-    auto a = utils::random::instance().buffer<64>();
-    auto b = utils::random::instance().buffer<64>();
-    unsigned char A[64];
-    unsigned char B[64];
-    unsigned char alice_session_key[64];
-    unsigned char bob_session_key[64];
+    // ----------------------|Alice|-------------------------
+    dh_t alice_model;
+    a = utils::random::instance().buffer<64>();
+    alice_model.seed(a.data(), a.size());
+    alice_model.generate_public_key(A.data(), A.size());
 
-    dh_t model_alice;
-    model_alice.seed(a.data(), a.size());
-    model_alice.generate_public_key(A);
+    // -----------------------|Bob|--------------------------
+    dh_t bob_model;
+    b = utils::random::instance().buffer<64>();
+    bob_model.seed(b.data(), b.size());
+    bob_model.generate_public_key(B.data(), B.size());
 
-    dh_t model_bob;
-    model_bob.seed(b.data(), b.size());
-    model_bob.generate_public_key(B);
+    // ----------------------|Alice|-------------------------
+    alice_model.generate_session_key(B.data(), B.size(), S1.data(), S1.size());
 
-    model_alice.generate_session_key(B, alice_session_key);
-    model_alice.generate_session_key(A, bob_session_key);
+    // -----------------------|Bob|--------------------------
+    bob_model.generate_session_key(A.data(), A.size(), S2.data(), S2.size());
 
-    ASSERT_EQ(memcmp(alice_session_key, bob_session_key, 64), 0);
-
+    ASSERT_EQ(S1, S2);
 }
