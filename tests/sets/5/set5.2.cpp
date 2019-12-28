@@ -68,10 +68,10 @@ TEST(set_5_2, run)
     // Change some params:
     //     set A = p
     //
-    // When changing this the math will be:
+    // When changing those params for bob, the math will be:
+    //     S = (A^b) % P = (P^b) % P = 0
     //
-    // S
-    //
+    msg1.A = msg1.p;
 
     // -----------------------|Bob|--------------------------
     dh_t bob_model(msg1.p._M_elems, msg1.g._M_elems);
@@ -83,6 +83,15 @@ TEST(set_5_2, run)
     auto bob_aes_key = derive_key<aes_t::key_size>(S2.data(), S2.size());
     bob_enc.initialize(bob_aes_key.data(), bob_aes_key.size(), IV.data(), IV.size());
 
+    // -----------------------|Eve|--------------------------
+    // Change some params:
+    //     set A = p
+    //
+    // When changing those params for alice, the math will be:
+    //     S = (B^a) % P = (P^a) % P = 0
+    //
+    msg2.B = msg1.p;
+
     // ----------------------|Alice|-------------------------
     alice_model.generate_session_key(msg2.B.data(), msg2.B.size(), S1.data(), S1.size());
     aes_t alice_enc;
@@ -93,8 +102,20 @@ TEST(set_5_2, run)
     alice_enc.encrypt(msg3.msg.data(), msg3.msg.size());
 
     // -----------------------|Bob|--------------------------
-    bob_enc.decrypt(msg3.msg.data(), msg3.msg.size());
+    auto bob_decrypted_data = msg3.msg;
+    bob_enc.decrypt(bob_decrypted_data.data(), bob_decrypted_data.size());
+
+    // -----------------------|Eve|--------------------------
+    // We know that the session key was 0, now we can decrypt the communication
+    //
+    aes_t eve_enc;
+    std::array<unsigned char, 64> eve_session_key = {0};
+    auto eve_aes_key = derive_key<aes_t::key_size>(eve_session_key.data(), eve_session_key.size());
+    auto eve_decrypted_data = msg3.msg;
+    eve_enc.initialize(eve_aes_key.data(), eve_aes_key.size(), IV.data(), IV.size());
+    eve_enc.decrypt(eve_decrypted_data.data(), eve_decrypted_data.size());
 
     // ----------------------|TEST|--------------------------
-    ASSERT_EQ(msg3.msg, message_to_send);
+    ASSERT_EQ(bob_decrypted_data, message_to_send);
+    ASSERT_EQ(eve_decrypted_data, message_to_send);
 }
