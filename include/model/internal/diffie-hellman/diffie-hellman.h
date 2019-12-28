@@ -66,6 +66,12 @@ namespace model
                 return _;
             }
 
+            num_t get_p() const
+            { return _p; }
+
+            num_t get_g() const
+            { return _g; }
+
         private:
             num_t _p, _g;
             num_t _private_key;

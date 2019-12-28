@@ -61,7 +61,7 @@ namespace model
         diffie_hellman() : _dh(defaults::default_p(), defaults::default_q())
         {}
 
-        diffie_hellman(const unsigned char (&p)[SizeInBytes], const unsigned char (&q)[SizeInBytes]) : _dh(p, q)
+        diffie_hellman(const unsigned char (&p)[SizeInBytes], const unsigned char (&g)[SizeInBytes]) : _dh(p, g)
         {}
 
         void seed(const unsigned char key[], size_t length)
@@ -108,6 +108,26 @@ namespace model
 
             auto k = _dh.generate_session_key(number);
             std::copy_n((unsigned char *) &k, SizeInBytes, session_key);
+        }
+
+        void get_p(unsigned char o_p[], size_t length) const
+        {
+            if (length != SizeInBytes)
+            { throw std::length_error("Invalid key length"); }
+
+            auto &number = *((number_t *) o_p);
+
+            number = _dh.get_p();
+        }
+
+        void get_g(unsigned char o_g[], size_t length) const
+        {
+            if (length != SizeInBytes)
+            { throw std::length_error("Invalid key length"); }
+
+            auto &number = *((number_t *) o_g);
+
+            number = _dh.get_g();
         }
 
     private:
