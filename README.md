@@ -14,5 +14,6 @@ Beside the attacks and challenges, this repo contains implementations for:
 * **Mathematics** - bignums, modpow, modmul
 * **Others** - encoding, padding, base64, hex and other utils
 
-## Challenges Comments
+## Challenges Notes
 * **5.1** - The implementation of the modmul and modpow is not the best... its no the trivial implementations but are far from optimal and takes alot of memory and time to calculate. There are much better ways for implementing this....
+* **5.2** - The implementation of set 5.1 was broken and was fixed the the implementation of 5.2

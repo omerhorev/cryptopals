@@ -23,7 +23,7 @@ namespace model
 
         static const num_t default_p()
         {
-            static const unsigned char _[] = {0xfc, 0xa6, 0x82, 0xce, 0x8e, 0x12, 0xca, 0xba, 0x26, 0xef, 0xcc, 0xf7,
+            static const unsigned char _[] = {0x7c, 0xa6, 0x82, 0xce, 0x8e, 0x12, 0xca, 0xba, 0x26, 0xef, 0xcc, 0xf7,
                                               0x11, 0x0e, 0x52, 0x6d, 0xb0, 0x78, 0xb0, 0x5e, 0xde, 0xcb, 0xcd, 0x1e,
                                               0xb4, 0xa2, 0x08, 0xf3, 0xae, 0x16, 0x17, 0xae, 0x01, 0xf3, 0x5b, 0x91,
                                               0xa4, 0x7e, 0x6d, 0xf6, 0x34, 0x13, 0xc5, 0xe1, 0x2e, 0xd0, 0x89, 0x9b,
@@ -54,29 +54,49 @@ namespace model
     private:
         static const size_t SizeInBytes = SizeInBits / 8;
         using defaults = diffie_hellman_defaults<SizeInBits>;
+        using dh_t = internal::diffie_hellman<SizeInBits>;
+        using number_t = typename internal::diffie_hellman<SizeInBits>::num_t;
+
     public:
         diffie_hellman() : _dh(defaults::default_p(), defaults::default_q())
         {}
 
-        diffie_hellman(const unsigned char (&p)[SizeInBytes], const unsigned char (&q)[SizeInBytes]) : _dh(p, q)
+        diffie_hellman(const unsigned char (&p)[SizeInBytes], const unsigned char (&g)[SizeInBytes]) : _dh(p, g)
         {}
 
-        void seed(const unsigned char (&key)[SizeInBytes])
-        { _dh.seed(tonum(key)); }
-
         void seed(const unsigned char key[], size_t length)
-        { _dh.seed(tonum(key, length)); }
+        {
+            if (length != SizeInBytes)
+            {
+                throw std::length_error("Invalid key length");
+            }
+
+            auto number = *((number_t *) key);
+            _dh.seed(number);
+        }
 
         void generate_public_key(unsigned char (&key)[SizeInBytes])
-        { _dh.generate_session_key(tonum(key)); }
+        {
+            auto &number = *((number_t *) key);
+            number = _dh.generate_public_key();
+        }
 
         void generate_public_key(unsigned char key[], size_t length)
-        { _dh.generate_session_key(tonum(key, length)); }
+        {
+            if (length != SizeInBytes)
+            {
+                throw std::length_error("Invalid key length");
+            }
+
+            auto k = _dh.generate_public_key();
+            std::copy_n((unsigned char *) &k, SizeInBytes, key);
+        }
 
         void generate_session_key(const unsigned char (&public_key)[SizeInBytes],
                                   unsigned char (&session_key)[SizeInBytes])
         {
-            auto k = _dh.generate_session_key(tonum(public_key));
+            auto &number = *((number_t *) public_key);
+            auto k = _dh.generate_session_key(number);
             auto _ = (unsigned char *) &k;
             std::copy_n(_, SizeInBytes, session_key);
         }
@@ -84,39 +104,30 @@ namespace model
         void generate_session_key(const unsigned char public_key[], size_t public_key_length,
                                   unsigned char session_key[], size_t session_key_length)
         {
-            auto k = _dh.generate_session_key(tonum(public_key, public_key_length));
-            auto _ = (unsigned char *) &k;
-            std::copy_n(_, SizeInBytes, session_key);
+            auto &number = *((number_t *) public_key);
+
+            auto k = _dh.generate_session_key(number);
+            std::copy_n((unsigned char *) &k, SizeInBytes, session_key);
         }
 
-    private:
-
-        template<size_t N>
-        static auto &tonum(unsigned char (&data)[N])
-        { return *((typename model::internal::diffie_hellman<SizeInBits>::num_t *) data); }
-
-        static auto &tonum(unsigned char data[], size_t length)
+        void get_p(unsigned char o_p[], size_t length) const
         {
             if (length != SizeInBytes)
-            {
-                throw std::length_error("Invalid length");
-            }
+            { throw std::length_error("Invalid key length"); }
 
-            return *((typename model::internal::diffie_hellman<SizeInBits>::num_t *) data);
+            auto &number = *((number_t *) o_p);
+
+            number = _dh.get_p();
         }
 
-        template<size_t N>
-        static const auto &tonum(const unsigned char (&data)[N])
-        { return *((typename model::internal::diffie_hellman<SizeInBits>::num_t *) data); }
-
-        static const auto &tonum(const unsigned char data[], size_t length)
+        void get_g(unsigned char o_g[], size_t length) const
         {
             if (length != SizeInBytes)
-            {
-                throw std::length_error("Invalid length");
-            }
+            { throw std::length_error("Invalid key length"); }
 
-            return *((typename model::internal::diffie_hellman<SizeInBits>::num_t *) data);
+            auto &number = *((number_t *) o_g);
+
+            number = _dh.get_g();
         }
 
     private:
